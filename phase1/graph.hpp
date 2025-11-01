@@ -42,4 +42,5 @@ class Graph{
         const std::vector<int>& getNeighborEdges(int nodeId) const;
         const Edge& getEdge(int edgeId) const;
         const Node& getNode(int nodeId) const;
+        std::vector<int> getAllNodeIds() const;
 };

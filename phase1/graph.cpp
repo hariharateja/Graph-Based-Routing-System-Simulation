@@ -88,3 +88,12 @@ const Edge& Graph::getEdge(int edgeId) const {
 const Node& Graph::getNode(int nodeId) const {
     return m_nodes.at(nodeId);
 }
+
+std::vector<int> Graph::getAllNodeIds() const {
+    std::vector<int> ids;
+    ids.reserve(m_nodes.size()); // Optimize allocation
+    for (const auto& pair : m_nodes) {
+        ids.push_back(pair.first);
+    }
+    return ids;
+}
