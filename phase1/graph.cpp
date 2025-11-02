@@ -29,12 +29,12 @@ Edge Edge::fromJson(const json& j) {
 
 void Graph::buildAdjacencyList() {
     m_adjList.clear();
+
+    m_adjList.assign(m_nodes.size(),{});
     for (const auto& pair : m_edges) {
         const Edge& e = pair.second;
         m_adjList[e.u].push_back(e.id);
-        if (!e.oneway) {
-            m_adjList[e.v].push_back(e.id);
-        }
+        if (!e.oneway) m_adjList[e.v].push_back(e.id);
     }
 }
 
@@ -42,6 +42,7 @@ void Graph::loadFromJson(const json& graphData) {
     m_nodes.clear();
     m_edges.clear();
 
+    m_nodes.resize(graphData.at("nodes").size());
     for (const auto& nodeJson : graphData.at("nodes")) {
         Node n = Node::fromJson(nodeJson);
         m_nodes[n.id] = n;
@@ -50,7 +51,7 @@ void Graph::loadFromJson(const json& graphData) {
         Edge e = Edge::fromJson(edgeJson);
         m_edges[e.id] = e;
     }
-
+    
     std::cout << "Graph loaded: " << m_nodes.size() << " nodes, " 
               << m_edges.size() << " edges." << std::endl;
               
@@ -59,26 +60,31 @@ void Graph::loadFromJson(const json& graphData) {
 
 void Graph::removeEdge(int edgeId) {
     if (m_edges.count(edgeId)) {
-        m_edges.erase(edgeId);
-        buildAdjacencyList(); 
+        Edge e = m_edges[edgeId];
+        auto& vec = m_adjList[e.u];
+        vec.erase(std::remove(vec.begin(),vec.end(),e.id),vec.end());
+        if(!e.oneway){
+            auto& vec = m_adjList[e.v];
+            vec.erase(std::remove(vec.begin(),vec.end(),e.id),vec.end());
+        }
     }
 }
 
 void Graph::modifyEdge(int edgeId, const json& patch) {
     if (m_edges.count(edgeId)) {
-        if (patch.contains("length")) {
-            m_edges.at(edgeId).length = patch.at("length");
+        Edge& e = m_edges[edgeId];
+        auto& vec = m_adjList[e.u];
+        if (patch.contains("length")) e.length = patch.at("length"); // if there is patch
+        if (std::find(vec.begin(),vec.end(),e.id) == vec.end()){ // if the edge was disabled
+            vec.push_back(e.id);
+            if(!e.oneway) m_adjList[e.v].push_back(e.id);
         }
     }
 }
 
 const std::vector<int>& Graph::getNeighborEdges(int nodeId) const {
-    auto it = m_adjList.find(nodeId);
-    if (it == m_adjList.end()) {
-        static const std::vector<int> empty_vec;
-        return empty_vec;
-    }
-    return it->second;
+    if (nodeId < 0 || nodeId >= m_nodes.size()) return {};
+    return m_adjList[nodeId];
 }
 
 const Edge& Graph::getEdge(int edgeId) const {
@@ -86,14 +92,20 @@ const Edge& Graph::getEdge(int edgeId) const {
 }
 
 const Node& Graph::getNode(int nodeId) const {
-    return m_nodes.at(nodeId);
+    if(nodeId < m_nodes.size()) return m_nodes[nodeId];
+    else{
+        std::cout << "Invalid ID: " << nodeId << std::endl;
+        std::cout << "Graph not loaded!, please load first" << std::endl;
+        static const Node dummy;
+        return dummy; // dummy
+    }
 }
 
 std::vector<int> Graph::getAllNodeIds() const {
     std::vector<int> ids;
     ids.reserve(m_nodes.size()); // Optimize allocation
-    for (const auto& pair : m_nodes) {
-        ids.push_back(pair.first);
+    for (const auto& node : m_nodes) {
+        ids.push_back(node.id);
     }
     return ids;
 }

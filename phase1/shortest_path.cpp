@@ -44,7 +44,7 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
         int currentNode = pq.top().second;
         pq.pop();
 
-        if (cost.count(currentNode) && currentCost > cost[currentNode]) {
+        if (cost.count(currentNode) && currentCost > cost[currentNode]) { // multiple instances in pq
             continue; 
         }
         if (currentNode == end) {
@@ -56,9 +56,8 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
         }
         for (int edgeId : graph.getNeighborEdges(currentNode)){
             const Edge& edge = graph.getEdge(edgeId);
-            if (forbidden_road_types.count(edge.road_type)){
-                continue;
-            }
+            if (forbidden_road_types.count(edge.road_type)) continue;
+            if(forbidden_nodes.count(edge.v)) continue; // to reduce no.of pushes into pq
             double edgeCost = 0.0;
             if (mode == "distance") {
                 edgeCost = edge.length;
@@ -66,7 +65,7 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
             else{
                 edgeCost = edge.average_time;
             }
-            int neighborNode = (edge.u == currentNode) ? edge.v : edge.u;
+            int neighborNode = (edge.u == currentNode) ? edge.v : edge.u; // since it maybe undirected
             double newCost = currentCost + edgeCost;
 
             if (!cost.count(neighborNode) || newCost < cost[neighborNode]){
@@ -95,7 +94,7 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
             std::reverse(result.path.begin(), result.path.end());
         }
         else {
-        result.possible = false;
+            result.possible = false;
         }
     }
     return result;
