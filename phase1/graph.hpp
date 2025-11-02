@@ -29,9 +29,10 @@ struct Edge {
 
 class Graph{
     private:
-        std::map<int,Node> m_nodes;
-        std::map<int,Edge> m_edges;
-        std::map<int, std::vector<int>> m_adjList;
+        std::vector<Node> m_nodes;
+        // map, since edges are not given to have 0-based contiguous ids unlike nodes
+        std::map<int,Edge> m_edges; 
+        std::vector<std::vector<int>> m_adjList;
         void buildAdjacencyList();
 
     public:
@@ -39,9 +40,11 @@ class Graph{
         void removeEdge(int edgeId);
         void modifyEdge(int edgeId, const json& patch);
 
-        // here in this these are accessible by user , they should be handled carefully , we are returning a reference for speed and 
-        //since we are returning the reference there is chance of chaning internal data to make sure they are safe we used const 
-        //suggested by autofill github 
+        /*
+        here in this, these are accessible by user, they should be handled carefully, we are returning a reference for speed and 
+        since we are returning the reference there is chance of chaning internal data. To make sure they are safe we used const 
+        (Suggested by autofill github)
+        */ 
         const std::vector<int>& getNeighborEdges(int nodeId) const;
         const Edge& getEdge(int edgeId) const;  
         const Node& getNode(int nodeId) const;
