@@ -15,7 +15,6 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
     std::string mode = query.at("mode");
 
     std::set<int> forbidden_nodes;
-
     if(query.contains("constraints") && query["constraints"].contains("forbidden_nodes")){
         for ( auto& node_id : query["constraints"]["forbidden_nodes"]) {
             forbidden_nodes.insert(int(node_id));
@@ -67,7 +66,9 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
             }
             int neighborNode = (edge.u == currentNode) ? edge.v : edge.u; // since it maybe undirected
             double newCost = currentCost + edgeCost;
-
+            if (forbidden_nodes.count(neighborNode)) {
+                continue;
+            }
             if (!cost.count(neighborNode) || newCost < cost[neighborNode]){
                 cost[neighborNode] = newCost;
                 parent[neighborNode] = currentNode;
