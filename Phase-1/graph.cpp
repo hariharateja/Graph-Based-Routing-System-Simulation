@@ -75,6 +75,8 @@ void Graph::modifyEdge(int edgeId, const json& patch) {
         Edge& e = m_edges[edgeId];
         auto& vec = m_adjList[e.u];
         if (patch.contains("length")) e.length = patch.at("length"); // if there is patch
+        if (patch.contains("average_time")) e.average_time = patch.at("average_time");
+        if (patch.contains("speed_profile")) e.speed_profile = patch.at("speed_profile").get<std::vector<double>>();
         if (std::find(vec.begin(),vec.end(),e.id) == vec.end()){ // if the edge was disabled
             vec.push_back(e.id);
             if(!e.oneway) m_adjList[e.v].push_back(e.id);

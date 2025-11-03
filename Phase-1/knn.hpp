@@ -1,4 +1,3 @@
-#pragma once
 #include "graph.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
