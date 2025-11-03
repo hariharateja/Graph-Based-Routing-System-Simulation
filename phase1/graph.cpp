@@ -96,7 +96,7 @@ const Node& Graph::getNode(int nodeId) const {
     else{
         std::cout << "Invalid ID: " << nodeId << std::endl;
         std::cout << "Graph not loaded!, please load first" << std::endl;
-        static const Node dummy;
+        static const Node dummy = Node::fromJson(json{{"id",-1},{"lat",0.0},{"lon",0.0}});
         return dummy; // dummy
     }
 }
