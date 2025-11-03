@@ -7,7 +7,7 @@
             2
         ],
         "possible": true,
-        "processing_time": 0.003167
+        "processing_time": 0.040883
     },
     {
         "id": 2,
@@ -18,23 +18,21 @@
             3
         ],
         "possible": true,
-        "processing_time": 0.002084
+        "processing_time": 0.005347
     },
     {
         "id": 3,
-        "minimum_distance": 3.5e-323,
-        "path": [],
-        "possible": true,
-        "processing_time": 0.002084
+        "possible": false,
+        "processing_time": 0.004113
     },
     {
         "id": 4,
         "nodes": [],
-        "processing_time": 0.00175
+        "processing_time": 0.454062
     },
     {
         "done": true,
-        "processing_time": 0.001208
+        "processing_time": 0.002723
     },
     {
         "id": 6,
@@ -45,6 +43,6 @@
             2
         ],
         "possible": true,
-        "processing_time": 0.003209
+        "processing_time": 0.006521
     }
 ]
