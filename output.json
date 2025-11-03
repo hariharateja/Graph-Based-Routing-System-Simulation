@@ -1,222 +1,39 @@
 [
     {
         "id": 1,
-        "minimum_distance": 300.0,
-        "path": [0,99],
+        "minimum_distance": 150.0,
+        "path": [0,2],
         "possible": true,
-        "processing_time": 0.005833
+        "processing_time": 0.002708
     },
     {
         "id": 2,
-        "minimum_time": 15.0,
-        "path": [0,99],
+        "minimum_distance": 350.0,
+        "path": [0,2,3],
         "possible": true,
-        "processing_time": 0.003583
+        "processing_time": 0.001917
     },
     {
         "id": 3,
-        "minimum_distance": 745.0,
-        "path": [10,11,61,81,91,51,50],
-        "possible": true,
-        "processing_time": 0.038417
+        "possible": false,
+        "processing_time": 0.001833
     },
     {
         "id": 4,
-        "minimum_time": 11.0,
-        "path": [20,80],
-        "possible": true,
-        "processing_time": 0.002583
+        "nodes": [
+            4
+        ],
+        "processing_time": 0.001916
     },
     {
-        "id": 5,
-        "nodes": [],
-        "processing_time": 0.003
+        "done": true,
+        "processing_time": 0.000917
     },
     {
         "id": 6,
-        "nodes": [],
-        "processing_time": 0.043541
-    },
-    {
-        "id": 7,
-        "nodes": [],
-        "processing_time": 0.001125
-    },
-    {
-        "done": true,
-        "processing_time": 0.000833
-    },
-    {
-        "id": 8,
-        "minimum_distance": 630.0,
-        "path": [0,99,1,2],
+        "minimum_distance": 220.0,
+        "path": [0,1,2],
         "possible": true,
-        "processing_time": 0.034083
-    },
-    {
-        "done": true,
-        "processing_time": 0.000625
-    },
-    {
-        "id": 9,
-        "minimum_distance": 695.0,
-        "path": [0,50,51,52,53,73,3],
-        "possible": true,
-        "processing_time": 0.026292
-    },
-    {
-        "id": 10,
-        "minimum_time": 6.0,
-        "path": [5,15],
-        "possible": true,
-        "processing_time": 0.002791
-    },
-    {
-        "id": 11,
-        "nodes": [],
-        "processing_time": 0.04125
-    },
-    {
-        "id": 12,
-        "minimum_distance": 635.0,
-        "path": [30,29,28,68,69,70],
-        "possible": true,
-        "processing_time": 0.021917
-    },
-    {
-        "done": true,
-        "processing_time": 0.000542
-    },
-    {
-        "id": 13,
-        "minimum_time": 16.0,
-        "path": [25,35,65,75],
-        "possible": true,
-        "processing_time": 0.011334
-    },
-    {
-        "id": 14,
-        "nodes": [],
-        "processing_time": 0.001
-    },
-    {
-        "done": true,
-        "processing_time": 0.000542
-    },
-    {
-        "id": 15,
-        "minimum_time": 8.8,
-        "path": [49,50,51],
-        "possible": true,
-        "processing_time": 0.003584
-    },
-    {
-        "id": 16,
-        "nodes": [],
-        "processing_time": 0.037208
-    },
-    {
-        "id": 17,
-        "minimum_distance": 301.0,
-        "path": [1,99,98],
-        "possible": true,
-        "processing_time": 0.00375
-    },
-    {
-        "id": 18,
-        "nodes": [],
-        "processing_time": 0.001
-    },
-    {
-        "done": true,
-        "processing_time": 0.000292
-    },
-    {
-        "id": 19,
-        "minimum_distance": 765.0,
-        "path": [0,99,95,85,75,65,55,54,53,52,51,50],
-        "possible": true,
-        "processing_time": 0.034125
-    },
-    {
-        "id": 20,
-        "minimum_time": 14.0,
-        "path": [10,90],
-        "possible": true,
-        "processing_time": 0.004375
-    },
-    {
-        "id": 21,
-        "nodes": [],
-        "processing_time": 0.038708
-    },
-    {
-        "done": true,
-        "processing_time": 0.000417
-    },
-    {
-        "id": 22,
-        "minimum_distance": 350.0,
-        "path": [0,99],
-        "possible": true,
-        "processing_time": 0.000875
-    },
-    {
-        "id": 23,
-        "nodes": [],
-        "processing_time": 0.001
-    },
-    {
-        "id": 24,
-        "minimum_time": 31.3,
-        "path": [25,5,6,46,45,75],
-        "possible": true,
-        "processing_time": 0.017209
-    },
-    {
-        "done": true,
-        "processing_time": 0.000375
-    },
-    {
-        "id": 25,
-        "minimum_distance": 539.0,
-        "path": [10,11,61,41,40],
-        "possible": true,
-        "processing_time": 0.024916
-    },
-    {
-        "id": 26,
-        "nodes": [],
-        "processing_time": 0.04075
-    },
-    {
-        "id": 27,
-        "minimum_time": 22.8,
-        "path": [60,61,81,91,90],
-        "possible": true,
-        "processing_time": 0.025708
-    },
-    {
-        "done": true,
-        "processing_time": 0.000417
-    },
-    {
-        "id": 28,
-        "minimum_distance": 270.0,
-        "path": [3,4,5],
-        "possible": true,
-        "processing_time": 0.003125
-    },
-    {
-        "id": 29,
-        "nodes": [],
-        "processing_time": 0.001
-    },
-    {
-        "id": 30,
-        "minimum_time": 15.2,
-        "path": [80,79,99,95],
-        "possible": true,
-        "processing_time": 0.007625
+        "processing_time": 0.001542
     }
 ]
