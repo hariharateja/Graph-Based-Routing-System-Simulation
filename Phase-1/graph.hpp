@@ -39,6 +39,11 @@ class Graph {
     void loadFromJson(const json& graphData);
     void removeEdge(int edgeId);
     void modifyEdge(int edgeId, const json& patch);
+    /*
+        here in this, these are accessible by user, they should be handled carefully, we are returning a reference for speed and 
+        since we are returning the reference there is chance of chaning internal data. To make sure they are safe we used const 
+        (Suggested by autofill github)
+    */ 
 
     const std::vector<int>& getNeighborEdges(int nodeId) const;
     const Edge& getEdge(int edgeId) const;
