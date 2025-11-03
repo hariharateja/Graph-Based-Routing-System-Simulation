@@ -93,9 +93,9 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
             result.path.push_back(start);
             std::reverse(result.path.begin(), result.path.end());
         }
-        else {
-            result.possible = false;
-        }
+    }
+    else {
+        result.possible = false;
     }
     return result;
 }
