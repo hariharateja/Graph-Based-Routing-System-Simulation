@@ -4,9 +4,9 @@ CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 INCLUDES = -IPhase-1 -IPhase-2 -IPhase-3 -Iinclude
 
 # --- Source Files ---
-PHASE1_SOURCES = $(wildcard Phase-1/*.cpp)
-PHASE2_SOURCES = $(wildcard Phase-2/*.cpp)
-PHASE3_SOURCES = $(wildcard Phase-3/*.cpp)
+PHASE1_SOURCES = $(wildcard Phase1/*.cpp)
+PHASE2_SOURCES = $(wildcard Phase2/*.cpp)
+PHASE3_SOURCES = $(wildcard Phase3/*.cpp)
 
 # --- Targets ---
 .PHONY: all phase1 phase2 phase3 clean
