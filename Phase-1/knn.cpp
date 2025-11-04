@@ -3,6 +3,7 @@
 #include <string>
 #include <queue>
 #include <map>
+#include<cmath>
 
 // the idea here is popping largest distances until there are k nodes with "least priority" are left 
 
@@ -67,7 +68,7 @@ json findKnn(const Graph& graph, const json& query){
         for(int nodeId : graph.getAllNodeIds()){
             const Node& node = graph.getNode(nodeId);
             double dist = SquaredDist(qLat , qLon , node.lat ,node.lon);
-            if(dist <= min_dist){
+            if(dist < min_dist){
                 min_dist = dist;
                 start = nodeId;
             }

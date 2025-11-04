@@ -57,11 +57,10 @@ static std::string formatJson(const json& j, int indent = 0, const std::string& 
         return out;
     }
     else if (j.is_array()) {
-        // If this array is a `path`, print it compactly on one line
-        if (key == "path") {
-            return j.dump();
+        
+        if (key == "path" || key == "nodes") {
+        return j.dump();
         }
-        // Otherwise pretty-print array elements each on their own line
         if (j.empty()) return "[]";
         std::string out = "[\n";
         for (size_t i = 0; i < j.size(); ++i) {
