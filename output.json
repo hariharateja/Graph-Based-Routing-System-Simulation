@@ -1,39 +1,48 @@
 [
     {
         "id": 1,
-        "minimum_distance": 150.0,
-        "path": [0,2],
+        "minimum_distance": 380.0,
+        "path": [0,5,10],
         "possible": true,
-        "processing_time": 0.002708
+        "processing_time": 0.014708
     },
     {
         "id": 2,
-        "minimum_distance": 350.0,
-        "path": [0,2,3],
+        "minimum_time": 19.0,
+        "path": [0,5,10],
         "possible": true,
-        "processing_time": 0.001917
+        "processing_time": 0.009459
     },
     {
         "id": 3,
-        "possible": false,
-        "processing_time": 0.001833
+        "nodes": [4,6,8],
+        "processing_time": 0.007125
     },
     {
         "id": 4,
-        "nodes": [
-            4
-        ],
-        "processing_time": 0.001916
+        "nodes": [0,2],
+        "processing_time": 0.006625
     },
     {
         "done": true,
-        "processing_time": 0.000917
+        "processing_time": 0.002042
+    },
+    {
+        "id": 5,
+        "minimum_distance": 520.0,
+        "path": [0,5,4,3,2],
+        "possible": true,
+        "processing_time": 0.013792
+    },
+    {
+        "done": true,
+        "processing_time": 0.001667
     },
     {
         "id": 6,
-        "minimum_distance": 220.0,
-        "path": [0,1,2],
+        "minimum_distance": 440.0,
+        "path": [0,5,4,3],
         "possible": true,
-        "processing_time": 0.001542
+        "processing_time": 0.00575
     }
 ]

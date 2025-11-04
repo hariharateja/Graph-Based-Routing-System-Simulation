@@ -28,7 +28,7 @@
     {
       "type": "knn",
       "id": 3,
-      "poi": "restaurant",
+      "poi": "Restaurant",
       "query_point": {
         "lat": 19.075000,
         "lon": 72.875000
@@ -39,7 +39,7 @@
     {
       "type": "knn",
       "id": 4,
-      "poi": "hospital",
+      "poi": "Hospital",
       "query_point": {
         "lat": 19.070000,
         "lon": 72.870000

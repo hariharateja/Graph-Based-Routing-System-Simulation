@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -O2
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare
 
 INCLUDES = -IPhase-1 -IPhase-2 -IPhase-3 -Iinclude
 

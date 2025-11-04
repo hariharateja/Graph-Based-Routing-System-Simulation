@@ -85,9 +85,10 @@ void Graph::modifyEdge(int edgeId, const json& patch) {
 }
 
 const std::vector<int>& Graph::getNeighborEdges(int nodeId) const {
-    if (nodeId < 0 || nodeId >= m_nodes.size()) return {};
+    static const std::vector<int> dummy = {};
+    if (nodeId < 0 || nodeId >= static_cast<int>(m_nodes.size())) return dummy;
     return m_adjList[nodeId];
-}
+    }
 
 const Edge& Graph::getEdge(int edgeId) const {
     return m_edges.at(edgeId);
