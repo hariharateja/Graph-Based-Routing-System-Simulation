@@ -9,6 +9,41 @@ struct CompareCost{
         return a.first > b.first; 
     }
 };
+double calculateTravelTime(const Edge& edge, double startTime) {
+    if (edge.speed_profile.size() != 96) {
+        return edge.average_time;
+    }
+    
+    double remainingDistance = edge.length;
+    double currentTime = startTime;
+    double totalTime = 0.0;
+    
+    while (remainingDistance > 0.0001) { 
+        long timeOfDay = static_cast<long>(currentTime) % 86400;
+        int idx = timeOfDay / 900;
+        
+        double speed_ms = edge.speed_profile[idx];
+        if (speed_ms <= 0) {
+            return totalTime + (remainingDistance / edge.length) * edge.average_time;
+        }
+        
+        long timeInCurrentSlot = timeOfDay % 900;
+        double timeRemainingInSlot = 900.0 - timeInCurrentSlot;
+        
+        double distanceInSlot = speed_ms * timeRemainingInSlot;
+        
+        if (distanceInSlot >= remainingDistance) {
+            totalTime += remainingDistance / speed_ms;
+            remainingDistance = 0.0;
+        } else {
+            totalTime += timeRemainingInSlot;
+            remainingDistance -= distanceInSlot;
+            currentTime += timeRemainingInSlot;
+        }
+    }
+    
+    return totalTime;
+}
 
 ShortestPathResult findShortestPath(const Graph& graph, const json& query){
     int queryId = query.at("id");
@@ -69,7 +104,12 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
             
             if (forbidden_nodes.count(neighborNode)) continue;
             
-            double edgeCost = (mode == "distance") ? edge.length : edge.average_time;
+            double edgeCost = 0.0;
+            if (mode == "distance") {
+                edgeCost = edge.length;
+            } else {
+                edgeCost = calculateTravelTime(edge, currentCost);
+            }
             double newCost = currentCost + edgeCost;
 
             if (!cost.count(neighborNode) || newCost < cost[neighborNode]){
