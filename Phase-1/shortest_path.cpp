@@ -69,7 +69,25 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
             
             if (forbidden_nodes.count(neighborNode)) continue;
             
-            double edgeCost = (mode == "distance") ? edge.length : edge.average_time;
+            double edgeCost = 0.0;
+            if (mode == "distance") {
+                edgeCost = edge.length;
+            } else {
+                if (edge.speed_profile.size() != 96) {
+                    edgeCost = edge.average_time;
+                } else {
+                    long time = static_cast<long>(currentCost) % 86400;
+                    int idx = time/ 900;
+
+                    double speed_ms = edge.speed_profile[idx];
+
+                    if (speed_ms > 0) {
+                        edgeCost = edge.length / speed_ms;
+                    } else {
+                        edgeCost = edge.average_time;
+                    }
+                }
+            }
             double newCost = currentCost + edgeCost;
 
             if (!cost.count(neighborNode) || newCost < cost[neighborNode]){
