@@ -13,7 +13,7 @@ def dist(lat1, lon1, lat2, lon2):
     k = sin(dphi/2)**2 + cos(phi1) * cos(phi2) * sin(dx/2)**2
     return 2 * R_e * atan2(sqrt(k),sqrt(1-k))
 
-testcases = [20, 30, 50, 100, 300, 500] #, 1000, 2500, 5000, 100000]
+testcases = [20, 30, 50, 100, 300, 500, 1000, 2500, 5000, 100000]
 
 
 def create_graph(osm_file, n, r):
@@ -69,6 +69,7 @@ def create_graph(osm_file, n, r):
         for tag in node.findall("tag"):
             if tag.attrib["v"] in place_tags:
                 node_data["pois"].append(tag.attrib["v"])
+
         index += 1
         data["nodes"].append(node_data)
 
