@@ -23,9 +23,6 @@ double calculateTravelTime(const Edge& edge, double startTime) {
         int idx = timeOfDay / 900;
         
         double speed_ms = edge.speed_profile[idx];
-        if (speed_ms <= 0) {
-            return totalTime + (remainingDistance / edge.length) * edge.average_time;
-        }
         
         long timeInCurrentSlot = timeOfDay % 900;
         double timeRemainingInSlot = 900.0 - timeInCurrentSlot;
