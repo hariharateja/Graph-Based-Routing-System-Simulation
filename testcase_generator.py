@@ -19,6 +19,14 @@ avg_speeds = {
     "local": [6,7,8,9]
 }
 
+delta = {
+    "expressway": 6,
+    "primary": 4,
+    "secondary": 2,
+    "tertiary": 1,
+    "local": 3
+}
+
 mode = ["distance", "time"]
 
 metric = ["euclidean", "shortest_path"]
@@ -36,6 +44,15 @@ def dist(lat1, lon1, lat2, lon2):
     return 2 * R_e * atan2(sqrt(k),sqrt(1-k))
 
 
+def generate_forbidden_nodes(nodes):
+    size = random.randint(1, len(nodes)//5) # //5 suggested by AI so that atmax 20% of the nodes are forbidden
+    return [n["id"] for n in random.sample(nodes, size)]
+
+def generate_forbidden_road_types(road_tags):
+    size = random.randint(1, len(road_tags)-1)
+    return random.sample(road_tags, size)
+
+
 def create_graph(osm_file, n, r):
     tree = ET.parse(osm_file)
     root = tree.getroot()
@@ -51,6 +68,7 @@ def create_graph(osm_file, n, r):
     data["meta"]["description"] = f"sample_set_{r}"
 
     node_map = {}  # node_id → (lat, lon)
+    id_map = {}
     index = 0
     
     # Parse all <node> elements
@@ -76,13 +94,14 @@ def create_graph(osm_file, n, r):
             if tag.attrib["v"] in place_tags:
                 node_data["pois"].append(tag.attrib["v"])
 
+        id_map[osm_id] = index
         index += 1
         data["nodes"].append(node_data)
 
     # Parse all <way> elements
     for way in root.findall("way"):
         way_data = {
-            "id": way.attrib.get("id"),
+            "id": int(way.attrib.get("id")),
             "u": None,
             "v": None,
             "length": 0.0,
@@ -96,7 +115,11 @@ def create_graph(osm_file, n, r):
         if len(nd_refs) >= 2:
             u = nd_refs[0]
             v = nd_refs[-1]
+        else:
+            continue
         if u in node_map and v in node_map:
+            way_data["u"] = id_map[u]
+            way_data["v"] = id_map[v]
             lat1, lon1 = node_map[u]
             lat2, lon2 = node_map[v]
             way_data["length"] = dist(lat1, lon1, lat2, lon2)
@@ -117,44 +140,25 @@ def create_graph(osm_file, n, r):
         speed = random.choice(avg_speeds[way_data["road_type"]])
         way_data["average_time"] = way_data["length"]/ speed
 
+        if random.randint(1,3) == 1:
+            rt = way_data["road_type"]
+            del_val = delta[rt]
+            avg_speed = random.choice(avg_speeds[way_data["road_type"]])
+            way_data["speed_profile"] = [round(avg_speed + random.uniform(-del_val/2,del_val), 6) for i in range(24)]
+
         data["edges"].append(way_data)
 
     return data
 
 
-if __name__ == "__main__":
-    input_file = "./Maps/map1.osm"
-
-    for r in range(6):
-        folder = f"./testcases/test{r+1}"
-        os.makedirs(folder, exist_ok=True)
-
-        output_file_g = f"{folder}/graph.json"
-        osm_data = create_graph(input_file,testcases[r], r+1)
-        with open(output_file_g, "w", encoding="utf-8") as f:
-            json.dump(osm_data, f, ensure_ascii=False, indent=2)
-
-        output_file_q = f"{folder}/query.json"
-        queries = {}
-        queries["meta"]["id"] = f"qset{r+1}"
-
-        for e in range(10):
-            query = generate_query(osm_data, query_order[e], e+1)
-            queries["events"].append(query)
-        with open(output_file_q, "w", encoding="utf-8") as f:
-                    json.dump(osm_data, f, ensure_ascii=False, indent=2)
-
-def generate_query(graph_data, type, id):
+def generate_query(graph_data, q_type, id):
     
     nodes = graph_data["nodes"]
     edges = graph_data["edges"]
 
-    query = {
-        "id": id,
-        "type": None;
-    }
+    query = {"id": id}
 
-    if type == "s":
+    if q_type == "s":
         query["type"] = "shortest_path"
         query["source"] = random.choice(nodes)
         query["target"] = random.choice(nodes)
@@ -167,16 +171,15 @@ def generate_query(graph_data, type, id):
             if random.randint(1,1000)%2:
                 query["constraints"]["forbidden_road_types"] = generate_forbidden_road_types(road_tags)
     
-    elif type == "knn":
-        query["type"] = type
+    elif q_type == "knn":
+        query["type"] =q_type
         query["poi"] = random.choice(place_tags)
         query_point = random.choice(nodes)
-        query["query_point"]["lat"] = query_point["lat"]
-        query["query_point"]["lon"] = query_point["lon"]
+        query["query_point"] = {"lat": query_point["lat"], "lon": query_point["lon"]}
         query["metric"] = random.choice(metric)
         query["k"] = random.randint(1, len(nodes)-1)
     
-    elif type == "r":
+    elif q_type == "r":
         query["type"] = "remove_edge"
         edge_ids = [e["id"] for e in edges]
         query["edge_id"] = random.choice(edge_ids)
@@ -189,13 +192,43 @@ def generate_query(graph_data, type, id):
         if random.randint(1, 1000)%2:
             query["patch"] = {}
             if random.randint(1, 1000)%2:
-                query["patch"]["length"] = random.randint() + random.rand()
+                query["patch"]["length"] = round(random.uniform(20.0, 300.0), 6)
             if random.randint(1, 1000)%2:
-                query["patch"]["average_time"] = random.randint() + random.rand()
+                query["patch"]["average_time"] = round(random.uniform(1.0, 10.0), 6)
             if random.randint(1, 1000)%2:
                 query["patch"]["road_type"] = random.choice(road_tags)
             if random.randint(1, 1000)%2:
-                query["patch"]["speed_profile"] = random
+                if query["patch"]["road_type"]:
+                    rt = query["patch"]["road_type"]
+                else:
+                    rt = next((e["road_type"] for e in edges if e["id"] == query["edge_id"]), None)
+                del_val = delta[rt]
+                avg_speed = random.choice(avg_speeds[rt])
+                query["patch"]["speed_profile"] = [round(avg_speed + random.uniform(-del_val/2,del_val), 6) for i in range(24)]
+
+    return query
+
+if __name__ == "__main__":
+    input_file = "./Maps/map1.osm"
+
+    for r in range(10):
+        folder = f"./testcases/test{r+1}"
+        os.makedirs(folder, exist_ok=True)
+
+        output_file_g = f"{folder}/graph.json"
+        osm_data = create_graph(input_file,testcases[r], r+1)
+        with open(output_file_g, "w", encoding="utf-8") as f:
+            json.dump(osm_data, f, ensure_ascii=False, indent=2)
+
+        # output_file_q = f"{folder}/query.json"
+        # queries = {"meta": {"id": f"qset{r+1}"}, "events": []}
+
+        # for e in range(10):
+        #     query = generate_query(osm_data, query_order[e], e+1)
+        #     queries["events"].append(query)
+        # with open(output_file_q, "w", encoding="utf-8") as f:
+        #             json.dump(queries, f, ensure_ascii=False, indent=2)
+
 
 
 
