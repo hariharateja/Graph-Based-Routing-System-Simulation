@@ -1,11 +1,22 @@
+import os
 import xml.etree.ElementTree as ET
 import json
+import random
+from math import radians, sin, cos, atan2, sqrt
 
 def dist(lat1, lon1, lat2, lon2):
-    
+    R_e = 6371000 # from website Adda247
+    phi1 = radians(lat1)
+    phi2 = radians(lat2)
+    dphi = radians(lat2 - lat1)
+    dx = radians(lon2 - lon1)
+    k = sin(dphi/2)**2 + cos(phi1) * cos(phi2) * sin(dx/2)**2
+    return 2 * R_e * atan2(sqrt(k),sqrt(1-k))
+
+testcases = [20, 30, 50, 100, 300, 500] #, 1000, 2500, 5000, 100000]
 
 
-def parse_osm(osm_file):
+def create_graph(osm_file, n, r):
     tree = ET.parse(osm_file)
     root = tree.getroot()
 
@@ -15,7 +26,10 @@ def parse_osm(osm_file):
         "edges": []
     }
 
-    id_map = {}
+    data["meta"]["id"] = f"sample_testcase_{r}"
+    data["meta"]["nodes"] = n
+    data["meta"]["description"] = f"sample_set_{r}"
+
     node_map = {}  # node_id → (lat, lon)
     index = 0
 
@@ -25,14 +39,12 @@ def parse_osm(osm_file):
 
 
     avg_speeds = {
-        "primary":,
-        "secondary":,
-        "tertiary":,
-        "local":,
-        "expressway":
+        "expressway": [22,23,24,25,26,27,28],
+        "primary":[17,18,19,20,21,22],
+        "secondary":[11,12,13,14,15,16,17],
+        "tertiary":[8,9,10,11,12,13,14],
+        "local": [6,7,8,9]
     }
-
-
 
     
     # Parse all <node> elements
@@ -40,18 +52,11 @@ def parse_osm(osm_file):
         osm_id = node.attrib["id"]
 
 
+        if index >= n:
+            break  # stop at 'n' nodes
 
 
-        # further edits required
-
-        if index >= 1e5: # need to make it somewhat randomized
-            break  # stop at 100000 nodes
-
-
-
-        id_map[osm_id] = index
         node_map[osm_id] = (round(float(node.attrib["lat"]), 6), round(float(node.attrib["lon"]), 6))
-        index += 1
 
         node_data = {
             "id": index,
@@ -64,7 +69,7 @@ def parse_osm(osm_file):
         for tag in node.findall("tag"):
             if tag.attrib["v"] in place_tags:
                 node_data["pois"].append(tag.attrib["v"])
-
+        index += 1
         data["nodes"].append(node_data)
 
     # Parse all <way> elements
@@ -98,8 +103,11 @@ def parse_osm(osm_file):
             if tag.attrib["k"] == "highway" and tag.attrib["v"] in road_tags:
                 way_data["road_type"] = tag.attrib["v"]
         
+        if way_data["road_type"] == None:
+            continue
+
         # avg_time calculation from speeds map
-        speed = avg_speeds[way_data["road_type"]]
+        speed = random.choice(avg_speeds[way_data["road_type"]])
         way_data["average_time"] = way_data["length"]/ speed
 
         data["edges"].append(way_data)
@@ -109,9 +117,11 @@ def parse_osm(osm_file):
 
 if __name__ == "__main__":
     input_file = "./Maps/map1.osm"
-    output_file = "graph.json"
 
-    osm_data = parse_osm(input_file)
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(osm_data, f, ensure_ascii=False, indent=2)
+    for r in range(6):
+        folder = f"./testcases/test{r+1}"
+        os.makedirs(folder, exist_ok=True)
+        output_file = f"{folder}/graph.json"
+        osm_data = create_graph(input_file,testcases[r], r+1)
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(osm_data, f, ensure_ascii=False, indent=2)
