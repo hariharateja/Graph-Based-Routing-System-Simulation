@@ -44,3 +44,4 @@ struct ShortestPathResult {
 };
 
 ShortestPathResult findShortestPath(const Graph& graph, const json& query);
+double calculateTravelTime(const Edge& edge, double startTime);
