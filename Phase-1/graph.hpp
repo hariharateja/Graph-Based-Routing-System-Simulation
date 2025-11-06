@@ -50,4 +50,7 @@ class Graph{
         const Edge& getEdge(int edgeId) const;  
         const Node& getNode(int nodeId) const;
         std::vector<int> getAllNodeIds() const;
+        double edgeWeight(int edgeId) const;
+        std::vector<std::tuple<int,int,double>> neighborsWithEdge(int nodeId) const;
+
 };

@@ -109,3 +109,23 @@ std::vector<int> Graph::getAllNodeIds() const {
     }
     return ids;
 }
+
+
+double Graph::edgeWeight(int edgeId) const {
+    auto it = m_edges.find(edgeId);
+    if (it == m_edges.end()) return std::numeric_limits<double>::infinity();
+    return it->second.length;
+}
+
+std::vector<std::tuple<int,int,double>> Graph::neighborsWithEdge(int nodeId) const {
+    std::vector<std::tuple<int,int,double>> out;
+    if (nodeId < 0 || nodeId >= (int)m_adjList.size()) return out;
+    for (int eid : m_adjList[nodeId]) {
+        auto it = m_edges.find(eid);
+        if (it == m_edges.end()) continue;
+        const Edge& e = it->second;
+        int v = (e.u == nodeId) ? e.v : e.u;
+        out.emplace_back(v, eid, e.length);
+    }
+    return out;
+}
