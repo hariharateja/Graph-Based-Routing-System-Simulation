@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "id": "small_test_case",
+    "nodes": 15,
+    "description": "Small test case for Phase 1 - 15 nodes, 20 edges"
+  },
+  "nodes": [
+    {
+      "id": 0,
+      "lat": 19.070000,
+      "lon": 72.870000,
+      "pois": ["Restaurant", "Hospital"]
+    },
+    {
+      "id": 1,
+      "lat": 19.071000,
+      "lon": 72.871000,
+      "pois": ["Restaurant"]
+    },
+    {
+      "id": 2,
+      "lat": 19.072000,
+      "lon": 72.872000,
+      "pois": ["Hospital"]
+    },
+    {
+      "id": 3,
+      "lat": 19.073000,
+      "lon": 72.873000,
+      "pois": ["Shopping Mall"]
+    },
+    {
+      "id": 4,
+      "lat": 19.074000,
+      "lon": 72.874000,
+      "pois": ["Restaurant", "Hospital"]
+    },
+    {
+      "id": 5,
+      "lat": 19.075000,
+      "lon": 72.875000,
+      "pois": ["Shopping Mall"]
+    },
+    {
+      "id": 6,
+      "lat": 19.076000,
+      "lon": 72.876000,
+      "pois": ["Restaurant"]
+    },
+    {
+      "id": 7,
+      "lat": 19.077000,
+      "lon": 72.877000,
+      "pois": ["Hospital"]
+    },
+    {
+      "id": 8,
+      "lat": 19.078000,
+      "lon": 72.878000,
+      "pois": ["Shopping Mall", "Restaurant"]
+    },
+    {
+      "id": 9,
+      "lat": 19.079000,
+      "lon": 72.879000,
+      "pois": ["Hospital"]
+    },
+    {
+      "id": 10,
+      "lat": 19.080000,
+      "lon": 72.880000,
+      "pois": ["Restaurant"]
+    },
+    {
+      "id": 11,
+      "lat": 19.081000,
+      "lon": 72.881000,
+      "pois": ["Shopping Mall"]
+    },
+    {
+      "id": 12,
+      "lat": 19.082000,
+      "lon": 72.882000,
+      "pois": ["Hospital"]
+    },
+    {
+      "id": 13,
+      "lat": 19.083000,
+      "lon": 72.883000,
+      "pois": ["Restaurant", "Shopping Mall"]
+    },
+    {
+      "id": 14,
+      "lat": 19.084000,
+      "lon": 72.884000,
+      "pois": ["Hospital"]
+    }
+  ],
+  "edges": [
+    {"id": 1000, "u": 0, "v": 1, "length": 100.0, "average_time": 5.0, "oneway": false, "road_type": "primary"},
+    {"id": 1001, "u": 1, "v": 2, "length": 120.0, "average_time": 6.0, "oneway": false, "road_type": "secondary"},
+    {"id": 1002, "u": 2, "v": 3, "length": 80.0, "average_time": 4.0, "oneway": false, "road_type": "local"},
+    {"id": 1003, "u": 3, "v": 4, "length": 150.0, "average_time": 7.5, "oneway": false, "road_type": "primary"},
+    {"id": 1004, "u": 4, "v": 5, "length": 90.0, "average_time": 4.5, "oneway": false, "road_type": "secondary"},
+    {"id": 1005, "u": 5, "v": 6, "length": 110.0, "average_time": 5.5, "oneway": false, "road_type": "local"},
+    {"id": 1006, "u": 6, "v": 7, "length": 130.0, "average_time": 6.5, "oneway": false, "road_type": "primary"},
+    {"id": 1007, "u": 7, "v": 8, "length": 75.0, "average_time": 3.8, "oneway": false, "road_type": "secondary"},
+    {"id": 1008, "u": 8, "v": 9, "length": 140.0, "average_time": 7.0, "oneway": false, "road_type": "local"},
+    {"id": 1009, "u": 9, "v": 10, "length": 95.0, "average_time": 4.8, "oneway": false, "road_type": "primary"},
+    {"id": 1010, "u": 10, "v": 11, "length": 105.0, "average_time": 5.3, "oneway": false, "road_type": "secondary"},
+    {"id": 1011, "u": 11, "v": 12, "length": 125.0, "average_time": 6.3, "oneway": false, "road_type": "local"},
+    {"id": 1012, "u": 12, "v": 13, "length": 85.0, "average_time": 4.3, "oneway": false, "road_type": "primary"},
+    {"id": 1013, "u": 13, "v": 14, "length": 160.0, "average_time": 8.0, "oneway": false, "road_type": "secondary"},
+    {"id": 1014, "u": 0, "v": 5, "length": 200.0, "average_time": 10.0, "oneway": true, "road_type": "expressway"},
+    {"id": 1015, "u": 5, "v": 10, "length": 180.0, "average_time": 9.0, "oneway": false, "road_type": "primary"},
+    {"id": 1016, "u": 2, "v": 7, "length": 150.0, "average_time": 7.5, "oneway": false, "road_type": "secondary"},
+    {"id": 1017, "u": 6, "v": 11, "length": 140.0, "average_time": 7.0, "oneway": false, "road_type": "secondary"},
+    {"id": 1018, "u": 1, "v": 8, "length": 170.0, "average_time": 8.5, "oneway": false, "road_type": "secondary"},
+    {"id": 1019, "u": 3, "v": 12, "length": 190.0, "average_time": 9.5, "oneway": false, "road_type": "secondary"}
+  ]
+}

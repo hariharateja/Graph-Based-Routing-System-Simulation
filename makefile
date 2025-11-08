@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -O2
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare
 
 INCLUDES = -IPhase-1 -IPhase-2 -IPhase-3 -Iinclude
 
@@ -14,7 +14,7 @@ PHASE3_SOURCES = $(wildcard ./Phase-3/*.cpp)
 all: phase1 phase2 phase3
 
 # Target for Phase 1 executable
-phase1: $(PHASE1_SOURCES) SampleDriver.cpp
+phase1: $(PHASE1_SOURCES) ./Phase-1/main.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=1 SampleDriver.cpp $(PHASE1_SOURCES) -o phase1
 
 # Target for Phase 2 executable
