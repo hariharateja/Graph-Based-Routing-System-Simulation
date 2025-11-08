@@ -14,8 +14,8 @@ PHASE3_SOURCES = $(wildcard ./Phase-3/*.cpp)
 all: phase1 phase2 phase3
 
 # Target for Phase 1 executable
-phase1: $(PHASE1_SOURCES) ./Phase-1/main.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=1 SampleDriver.cpp $(PHASE1_SOURCES) -o phase1
+phase1: $(PHASE1_SOURCES) 
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=1  $(PHASE1_SOURCES) -o phase1
 
 # Target for Phase 2 executable
 phase2: $(PHASE2_SOURCES) SampleDriver.cpp

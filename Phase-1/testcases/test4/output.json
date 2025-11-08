@@ -1,74 +1,79 @@
-[
-    {
-        "id": 1,
-        "minimum_distance": 380.0,
-        "path": [
-            0,
-            5,
-            10
-        ],
-        "possible": true,
-        "processing_time": 0.029541
+{
+    "meta": {
+        "id": "small_test_queries"
     },
-    {
-        "id": 2,
-        "minimum_time": 19.0,
-        "path": [
-            0,
-            5,
-            10
-        ],
-        "possible": true,
-        "processing_time": 0.010959
-    },
-    {
-        "id": 3,
-        "nodes": [
-            4,
-            6,
-            8
-        ],
-        "processing_time": 0.004834
-    },
-    {
-        "id": 4,
-        "nodes": [
-            0,
-            2
-        ],
-        "processing_time": 0.0055
-    },
-    {
-        "done": true,
-        "processing_time": 0.001666
-    },
-    {
-        "id": 5,
-        "minimum_distance": 520.0,
-        "path": [
-            0,
-            5,
-            4,
-            3,
-            2
-        ],
-        "possible": true,
-        "processing_time": 0.008083
-    },
-    {
-        "done": true,
-        "processing_time": 0.001459
-    },
-    {
-        "id": 6,
-        "minimum_distance": 440.0,
-        "path": [
-            0,
-            5,
-            4,
-            3
-        ],
-        "possible": true,
-        "processing_time": 0.006584
-    }
-]
+    "results": [
+        {
+            "id": 1,
+            "minimum_distance": 380.0,
+            "path": [
+                0,
+                5,
+                10
+            ],
+            "possible": true,
+            "processing_time": 0.011375
+        },
+        {
+            "id": 2,
+            "minimum_time": 19.0,
+            "path": [
+                0,
+                5,
+                10
+            ],
+            "possible": true,
+            "processing_time": 0.008125
+        },
+        {
+            "id": 3,
+            "nodes": [
+                4,
+                6,
+                8
+            ],
+            "processing_time": 0.004292
+        },
+        {
+            "id": 4,
+            "nodes": [
+                0,
+                2
+            ],
+            "processing_time": 0.00775
+        },
+        {
+            "done": true,
+            "processing_time": 0.001625
+        },
+        {
+            "id": 5,
+            "minimum_distance": 520.0,
+            "path": [
+                0,
+                5,
+                4,
+                3,
+                2
+            ],
+            "possible": true,
+            "processing_time": 0.012
+        },
+        {
+            "done": true,
+            "processing_time": 0.001291
+        },
+        {
+            "id": 6,
+            "minimum_distance": 440.0,
+            "path": [
+                0,
+                5,
+                4,
+                3
+            ],
+            "possible": true,
+            "processing_time": 0.006542
+        }
+    ]
+}
