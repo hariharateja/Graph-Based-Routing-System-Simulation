@@ -1,0 +1,63 @@
+{
+    "meta": {
+        "id": "qset1"
+    },
+    "results": [
+        {
+            "id": 1,
+            "possible": false,
+            "processing_time": 0.004459
+        },
+        {
+            "id": 2,
+            "nodes": [],
+            "processing_time": 0.003333
+        },
+        {
+            "done": true,
+            "id": 3,
+            "processing_time": 0.002458
+        },
+        {
+            "id": 4,
+            "possible": false,
+            "processing_time": 0.00475
+        },
+        {
+            "done": false,
+            "id": 5,
+            "processing_time": 0.0015
+        },
+        {
+            "id": 6,
+            "possible": false,
+            "processing_time": 0.0025
+        },
+        {
+            "done": true,
+            "id": 7,
+            "processing_time": 0.003625
+        },
+        {
+            "done": true,
+            "id": 8,
+            "processing_time": 0.001583
+        },
+        {
+            "id": 9,
+            "possible": false,
+            "processing_time": 0.001042
+        },
+        {
+            "id": 10,
+            "nodes": [
+                12,
+                16,
+                14,
+                10,
+                5
+            ],
+            "processing_time": 0.004166
+        }
+    ]
+}
