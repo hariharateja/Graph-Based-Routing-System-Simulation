@@ -7,5 +7,4 @@ using json = nlohmann::json;
 
 json findKnn(const Graph& graph, const json& query);
 
-
 json findKnn(const Graph& graph, const json& query);

@@ -122,8 +122,8 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
     
     if (path_found){
         result.possible = true;
-        result.minimum_distance = (mode == "distance") ? cost[end] : 0.0;
-        result.minimum_time = (mode == "time") ? cost[end] : 0.0;
+        result.minimum_distance = (mode == "distance") ? cost[end] : -1.0;
+        result.minimum_time = (mode == "time") ? cost[end] : -1.0;
         
         int currentNode = end;
         while (currentNode != start) {
