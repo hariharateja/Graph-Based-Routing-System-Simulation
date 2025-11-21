@@ -6,6 +6,7 @@
 #include <map>
 #include <limits>
 #include <algorithm>
+#include <sstream>
 
 struct CompareCost {
     bool operator()(const std::pair<double,int>& a, const std::pair<double,int>& b) const {
@@ -173,7 +174,7 @@ static double computeOverlapPercent(const Path& a, const Path& b) {
         if (edges.count(e)) ++common;
     }
 
-    double denom = static_cast<double>(std::min(a.edgeIds.size(), b.edgeIds.size()));
+    double denom = b.edgeIds.size();
     if (denom <= 0.0) return 0.0;
     return 100.0 * static_cast<double>(common) / denom;
 }
@@ -203,7 +204,6 @@ static double computeTotalPenaltyForSet(const std::vector<Path>& allPaths, const
         // number of other paths with overlap% > overlapThreshold
         int overlapPenalty = 0;
         for (int j = 0; j < k; ++j) {
-            if (i == j) continue;
             int jIdx = indices[j];
             double ov = computeOverlapPercent(pi, allPaths[jIdx]);
             if (ov > overlapThreshold) {
@@ -303,13 +303,12 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
     // output json
     json out; 
-    out["type"] = type;
     out["id"] = id;
     out["paths"] = json::array();
     if (K <= 0) return out;
 
     int maxCandidatePaths = 3 * K;
-    maxCandidatePaths = std::min(maxCandidatePaths, 50); // at least 50 candidates
+    maxCandidatePaths = std::min(maxCandidatePaths, 50); // at most 50 candidates
 
     std::vector<Path> candidatePaths = YensCandidates(graph, source, target, maxCandidatePaths);
 
@@ -338,7 +337,7 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
             double penalty = computeTotalPenaltyForSet(candidatePaths, tempIndices, baseCost, static_cast<double>(overlap_threshold));
 
-            if (penalty < bestPenalty || ( penalty == bestPenalty && candidatePaths[j].cost < candidatePaths[bestIndex].cost) ) {
+            if (penalty < bestPenalty || (penalty == bestPenalty && (bestIndex == -1 || candidatePaths[j].cost < candidatePaths[bestIndex].cost))){
                 bestPenalty = penalty;
                 bestIndex = j;
             }
@@ -363,8 +362,8 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
     for(const Path& p : finalPaths) {
         json pathJson;
-        pathJson["nodes"] = p.nodes;
-        pathJson["cost"] = p.cost;
+        pathJson["path"] = p.nodes;
+        pathJson["length"] = p.cost;
         out["paths"].push_back(pathJson);
     }
 
