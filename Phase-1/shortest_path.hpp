@@ -21,10 +21,10 @@ struct Output{
 };
 
 struct ShortestPathResult {
-    int id;
-    bool possible;
-    double minimum_distance;
-    double minimum_time;
+    int id = -1;
+    bool possible = -1;
+    double minimum_distance = -1.0;
+    double minimum_time = -1.0;
     
     std::vector<int> path;
     json toJson(const std::string& mode) const {

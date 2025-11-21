@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "id": "qset7"
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "shortest_path",
+      "source": 614,
+      "target": 130,
+      "mode": "time",
+      "constraints": {}
+    },
+    {
+      "id": 2,
+      "type": "knn",
+      "poi": "pharmacy",
+      "query_point": {
+        "lat": 12.976962,
+        "lon": 77.59842
+      },
+      "metric": "shortest_path",
+      "k": 198
+    },
+    {
+      "id": 3,
+      "type": "remove_edge",
+      "edge_id": 745190152
+    },
+    {
+      "id": 4,
+      "type": "shortest_path",
+      "source": 610,
+      "target": 955,
+      "mode": "time",
+      "constraints": {
+        "forbidden_road_types": [
+          "expressway",
+          "local"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "modify_edge",
+      "edge_id": 1101271050,
+      "patch": {
+        "road_type": "primary"
+      }
+    },
+    {
+      "id": 6,
+      "type": "shortest_path",
+      "source": 877,
+      "target": 30,
+      "mode": "time"
+    },
+    {
+      "id": 7,
+      "type": "modify_edge",
+      "edge_id": 1108447556
+    },
+    {
+      "id": 8,
+      "type": "remove_edge",
+      "edge_id": 1297594197
+    },
+    {
+      "id": 9,
+      "type": "shortest_path",
+      "source": 481,
+      "target": 101,
+      "mode": "distance"
+    },
+    {
+      "id": 10,
+      "type": "knn",
+      "poi": "pharmacy",
+      "query_point": {
+        "lat": 12.982406,
+        "lon": 77.598876
+      },
+      "metric": "euclidean",
+      "k": 117
+    }
+  ]
+}

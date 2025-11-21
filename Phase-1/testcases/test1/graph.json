@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "id": "sample_testcase_1",
+    "nodes": 20,
+    "description": "sample_set_1"
+  },
+  "nodes": [
+    {
+      "id": 0,
+      "lat": 12.970902,
+      "lon": 77.604807,
+      "pois": [
+        "hospital",
+        "restaurant",
+        "hospital"
+      ]
+    },
+    {
+      "id": 1,
+      "lat": 12.973169,
+      "lon": 77.609472,
+      "pois": [
+        "hospital",
+        "hotel"
+      ]
+    },
+    {
+      "id": 2,
+      "lat": 12.973638,
+      "lon": 77.595225,
+      "pois": []
+    },
+    {
+      "id": 3,
+      "lat": 12.9767,
+      "lon": 77.599331,
+      "pois": []
+    },
+    {
+      "id": 4,
+      "lat": 12.971917,
+      "lon": 77.60702,
+      "pois": []
+    },
+    {
+      "id": 5,
+      "lat": 12.974332,
+      "lon": 77.607716,
+      "pois": []
+    },
+    {
+      "id": 6,
+      "lat": 12.972913,
+      "lon": 77.607243,
+      "pois": []
+    },
+    {
+      "id": 7,
+      "lat": 12.972126,
+      "lon": 77.607015,
+      "pois": [
+        "restaurant"
+      ]
+    },
+    {
+      "id": 8,
+      "lat": 12.972086,
+      "lon": 77.607331,
+      "pois": [
+        "atm"
+      ]
+    },
+    {
+      "id": 9,
+      "lat": 12.975806,
+      "lon": 77.601657,
+      "pois": [
+        "pharmacy"
+      ]
+    },
+    {
+      "id": 10,
+      "lat": 12.975482,
+      "lon": 77.601588,
+      "pois": [
+        "pharmacy",
+        "petrol station"
+      ]
+    },
+    {
+      "id": 11,
+      "lat": 12.972971,
+      "lon": 77.601519,
+      "pois": [
+        "pharmacy"
+      ]
+    },
+    {
+      "id": 12,
+      "lat": 12.972852,
+      "lon": 77.603259,
+      "pois": [
+        "pharmacy",
+        "pharmacy"
+      ]
+    },
+    {
+      "id": 13,
+      "lat": 12.972343,
+      "lon": 77.604152,
+      "pois": [
+        "hotel"
+      ]
+    },
+    {
+      "id": 14,
+      "lat": 12.975211,
+      "lon": 77.604117,
+      "pois": [
+        "hospital",
+        "restaurant",
+        "petrol station"
+      ]
+    },
+    {
+      "id": 15,
+      "lat": 12.975584,
+      "lon": 77.602541,
+      "pois": [
+        "restaurant"
+      ]
+    },
+    {
+      "id": 16,
+      "lat": 12.974158,
+      "lon": 77.603025,
+      "pois": [
+        "restaurant",
+        "pharmacy"
+      ]
+    },
+    {
+      "id": 17,
+      "lat": 12.97278,
+      "lon": 77.60126,
+      "pois": []
+    },
+    {
+      "id": 18,
+      "lat": 12.970337,
+      "lon": 77.600745,
+      "pois": [
+        "petrol station",
+        "hotel",
+        "hotel"
+      ]
+    },
+    {
+      "id": 19,
+      "lat": 12.969331,
+      "lon": 77.600504,
+      "pois": []
+    }
+  ],
+  "edges": [
+    {
+      "id": 1246410563,
+      "u": 4,
+      "v": 8,
+      "length": 38.584531875633765,
+      "average_time": 1.9292265937816881,
+      "oneway": true,
+      "road_type": "primary"
+    }
+  ]
+}

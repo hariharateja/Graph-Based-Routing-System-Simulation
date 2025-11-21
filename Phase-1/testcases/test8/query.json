@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "id": "qset8"
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "shortest_path",
+      "source": 676,
+      "target": 486,
+      "mode": "time"
+    },
+    {
+      "id": 2,
+      "type": "knn",
+      "poi": "petrol station",
+      "query_point": {
+        "lat": 12.975111,
+        "lon": 77.604882
+      },
+      "metric": "shortest_path",
+      "k": 119
+    },
+    {
+      "id": 3,
+      "type": "remove_edge",
+      "edge_id": 323813903
+    },
+    {
+      "id": 4,
+      "type": "shortest_path",
+      "source": 1307,
+      "target": 1116,
+      "mode": "distance",
+      "constraints": {
+        "forbidden_road_types": [
+          "local",
+          "primary"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "modify_edge",
+      "edge_id": 31855471
+    },
+    {
+      "id": 6,
+      "type": "shortest_path",
+      "source": 1687,
+      "target": 509,
+      "mode": "time",
+      "constraints": {}
+    },
+    {
+      "id": 7,
+      "type": "modify_edge",
+      "edge_id": 36926667,
+      "patch": {
+        "length": 48.904721,
+        "average_time": 9.62188
+      }
+    },
+    {
+      "id": 8,
+      "type": "remove_edge",
+      "edge_id": 31855471
+    },
+    {
+      "id": 9,
+      "type": "shortest_path",
+      "source": 1033,
+      "target": 2085,
+      "mode": "time",
+      "constraints": {}
+    },
+    {
+      "id": 10,
+      "type": "knn",
+      "poi": "hotel",
+      "query_point": {
+        "lat": 12.972106,
+        "lon": 77.600415
+      },
+      "metric": "shortest_path",
+      "k": 115
+    }
+  ]
+}
