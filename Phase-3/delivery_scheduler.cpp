@@ -57,6 +57,47 @@ std::map<int, std::map<int, double>> compute_distance_matrix(const Graph& graph,
     }
     return matrix;
 }
+std::tuple<int, int, bool> find_min_max_move(
+    const std::vector<DriverState>& drivers,
+    const std::vector<OrderStatus>& orders,
+    const std::map<int, std::map<int, double>>& dist_matrix){
+
+    int best_driver_idx = -1;
+    int best_order_idx = -1;
+    bool best_is_pickup = false;
+    
+    //we want the assignment such that , max time should minimise 
+    double min_overall_max_time = std::numeric_limits<double>::max();
+    
+    // finding max time at current situation 
+    double current_max_driver_time = 0.0;
+
+    for(const auto& dr : drivers){
+        if (dr.current_time > current_max_driver_time){
+            current_max_driver_time = dr.current_time;
+        }
+    }
+
+    //iterating through every possible rider , task 
+    for (size_t d_idx = 0; d_idx < drivers.size(); ++d_idx){
+        const DriverState& driver = drivers[d_idx];
+        int current_node = driver.current_node;
+        for (size_t o_idx = 0; o_idx < orders.size(); ++o_idx){
+            const OrderStatus& order = orders[o_idx];
+            double travel_cost = std::numeric_limits<double>::max();
+            bool is_pickup = false;
+
+            // if pick up valid ??
+            if (!order.is_picked_up && dist_matrix.at(current_node).count(order.pickup)) {
+                travel_cost = dist_matrix.at(current_node).at(order.pickup);
+                is_pickup = true;
+            }
+
+            // is drop-off valid ??
+            
+        }
+    }
+}
 json solve_delivery_scheduling(const Graph& graph, const json& query){
     int depot = query["fleet"]["depot_node"];
     int num_drivers = query["fleet"]["num_delievery_guys"];
@@ -215,4 +256,11 @@ json solve_delivery_scheduling(const Graph& graph, const json& query){
         assignment["driver_id"] = dr.id;
         assignment["route"] = dr.route_path;
     }
+    for (const auto& o : orders) {
+        total_delivery_time_s += o.completion_time;
+    }
+
+    output["metrics"]["total_delivery_time_s"] = total_delivery_time_s;
+
+    return output;
 }

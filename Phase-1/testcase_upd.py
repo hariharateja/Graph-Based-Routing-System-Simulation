@@ -11,7 +11,7 @@ place_tags = ["restaurant", "petrol station", "hospital", "pharmacy", "hotel", "
 
 road_tags = ["primary", "secondary", "tertiary", "local", "expressway"]
 
-# speeds in kmph
+# speeds in m/s
 avg_speeds = {
     "expressway": [22,23,24,25,26,27,28],
     "primary":[17,18,19,20,21,22],
@@ -135,18 +135,7 @@ def create_graph(osm_file, n, r):
 
         # check if valid edges wrt end nodes
         nd_refs = [nd.attrib["ref"] for nd in way.findall("nd")]
-        if len(nd_refs) >= 2:
-            u = nd_refs[0]
-            v = nd_refs[-1]
-        else:
-            continue
-        if u in node_map and v in node_map:
-            way_data["u"] = id_map[u]
-            way_data["v"] = id_map[v]
-            lat1, lon1 = node_map[u]
-            lat2, lon2 = node_map[v]
-            way_data["length"] = haversine(lat1, lon1, lat2, lon2)
-        else:
+        if len(nd_refs) < 2:
             continue
 
         # check for tags first since we are finding avg time of edge wrt road_type
@@ -159,8 +148,23 @@ def create_graph(osm_file, n, r):
         if way_data["road_type"] == None:
             continue
 
+        for i in range(len(nd_refs) - 1):
+            u_osm = nd_refs[i]
+            v_osm = nd_refs[i+1]
+        
+        if u_osm not in id_map or v_osm not in id_map:
+            continue
+        u = id_map[u_osm]
+        v = id_map[v_osm]
+        way_data["u"] = u
+        way_data["v"] = v
+        lat1, lon1 = node_map[u_osm]
+        lat2, lon2 = node_map[v_osm]
+        way_data["length"] = haversine(lat1, lon1, lat2, lon2)
+
+
         # avg_time calculation from speeds map
-        speed = random.choice(avg_speeds[way_data["road_type"]]) * 3.6    # conversion to m/s
+        speed = random.choice(avg_speeds[way_data["road_type"]])    # conversion to m/s
         way_data["average_time"] = way_data["length"]/ speed
 
         if random.randint(1,3) == 1:
