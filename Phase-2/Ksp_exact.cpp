@@ -6,6 +6,8 @@
 #include <map>
 #include <limits>
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 
 struct ComparePath {
@@ -19,8 +21,17 @@ struct CompareCost {
     }
 }; // compare cost for pq 
 
-// using Dikstra algo with banned edges and nodes
-Path dijkstra (const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes){
+double heuristic(const Graph& graph, int node, int target){
+    const Node &n1 = graph.getNode(node);
+    const Node &n2 = graph.getNode(target);
+    
+    double dx = n1.lat - n2.lat;
+    double dy = n1.lon - n2.lon;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+// using A* algo with banned edges and nodes
+Path A_star(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes){
     Path resultpath;
     //trivial case
     if(source == target){
@@ -38,23 +49,23 @@ Path dijkstra (const Graph& graph, int source, int target, const std::unordered_
 
     if( bannedNodes.count(source)) return resultpath;// no path
     dist[source] = 0.0;
-    pq.push({0.0, source});
+    pq.push({heuristic(graph, source, target), source});
 
     while(!pq.empty()){
         auto [currdist, u] = pq.top();
         pq.pop();
 
-        if(currdist > dist[u]) continue;
         if(u == target) break;
+        if(currdist - heuristic(graph, u, target) > dist[u]) continue;
 
         for( auto [v,edgeid,w] : graph.neighborsWithEdge(u)){
             if(bannedEdges.count(edgeid) || bannedNodes.count(v)) continue;
-            
-            if(!dist.count(v) || currdist + w < dist[v]){
-                dist[v] = currdist + w;
+
+            if(!dist.count(v) || dist[u] + w < dist[v]){
+                dist[v] = dist[u] + w;
                 parentNode[v] = u;
                 parentEdge[v] = edgeid;
-                pq.push({currdist + w, v});
+                pq.push({dist[v] + heuristic(graph, v, target), v});
             }
         }
     }
@@ -101,7 +112,7 @@ static std::string makePathSignature(const Path& p) {
 }
 
 //yens algorithm
-json findKsp(const Graph& graph, const json& query) {
+json findKsp_exact(const Graph& graph, const json& query) {
     // parse query
     std::string type = query.at("type");
     int id = query.at("id");
@@ -115,7 +126,7 @@ json findKsp(const Graph& graph, const json& query) {
     out["paths"] = json::array();
     if (K <= 0) return out;
 
-    Path first = dijkstra(graph, source, target, {} , {});
+    Path first = A_star(graph, source, target, {} , {});
 
     if (first.nodes.empty()) {
         return out;
@@ -154,8 +165,8 @@ json findKsp(const Graph& graph, const json& query) {
                 bannedNodes.insert(prevPath.nodes[j]);
             } //create banned nodes
 
-            //use dijkstra to find spur path
-            Path spurPath = dijkstra(graph, spurNode, target, bannedEdges, bannedNodes);
+            //use A* to find spur path
+            Path spurPath = A_star(graph, spurNode, target, bannedEdges, bannedNodes);
             
             if (spurPath.nodes.empty()) continue;
 

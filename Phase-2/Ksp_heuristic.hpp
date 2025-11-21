@@ -11,7 +11,7 @@ struct Path {
     double cost = 0.0;
 };//to identify a path
 
-json findKsp_exact(const Graph& graph, const json& query); //yens algorithm to find K shortest paths
+json findKsp_heuristic(const Graph& graph, const json& query); //ESX-MinW applied yens algorithm to find K shortest paths
 
 double heuristic(const Graph& graph, int node, int target);//heuristic function for A* - Euclidean distance
 
