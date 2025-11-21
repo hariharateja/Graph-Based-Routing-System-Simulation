@@ -11,6 +11,7 @@ place_tags = ["restaurant", "petrol station", "hospital", "pharmacy", "hotel", "
 
 road_tags = ["primary", "secondary", "tertiary", "local", "expressway"]
 
+# speeds in kmph
 avg_speeds = {
     "expressway": [22,23,24,25,26,27,28],
     "primary":[17,18,19,20,21,22],
@@ -34,10 +35,21 @@ metric = ["euclidean", "shortest_path"]
 query_order = ["s", "knn", "r", "s", "m", "s", "m", "r", "s", "knn"]
 
 
-def dist(lat1, lon1, lat2, lon2):
-    dx = lat2 - lat1
-    dy = lon2 - lon1
-    return (dx*dx + dy*dy)**0.5
+def haversine(lat1, lon1, lat2, lon2): # from ai
+    # convert degrees → radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    # Earth radius in meters
+    R = 6371000  
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+
+    return R * c
+
 
 
 def generate_forbidden_nodes(nodes):
@@ -66,11 +78,18 @@ def create_graph(osm_file, n, r):
     node_map = {}  # node_id → (lat, lon)
     id_map = {}
     index = 0
+
+    referenced_nodes = set()
+    for way in root.findall("way"):
+        for nd in way.findall("nd"):
+            referenced_nodes.add(nd.attrib["ref"])
     
     # Parse all <node> elements
     for node in root.findall("node"):
         osm_id = node.attrib["id"]
 
+        if osm_id not in referenced_nodes:
+            continue
 
         if index >= n:
             break  # stop at 'n' nodes
@@ -86,11 +105,17 @@ def create_graph(osm_file, n, r):
         }
         
         # if the places are relevant
-        # for tag in node.findall("tag"):
-        #     if tag.attrib["v"] in place_tags:
-        #         node_data["pois"].append(tag.attrib["v"])
-        if random.randint(1, 10) == 1:
-            node_data["pois"].append(random.choice(place_tags))
+        for tag in node.findall("tag"):
+            if tag.attrib["v"] in place_tags:
+                node_data["pois"].append(tag.attrib["v"])
+        # since the graph is too random, mostly we don't have any 
+        if not len(node_data["pois"]):
+            if random.randint(1, 10) > 4:
+                node_data["pois"].append(random.choice(place_tags))
+                if random.randint(1, 10) > 6:
+                    node_data["pois"].append(random.choice(place_tags))
+                    if random.randint(1, 10) > 8:
+                        node_data["pois"].append(random.choice(place_tags))
 
         id_map[osm_id] = index
         index += 1
@@ -120,7 +145,7 @@ def create_graph(osm_file, n, r):
             way_data["v"] = id_map[v]
             lat1, lon1 = node_map[u]
             lat2, lon2 = node_map[v]
-            way_data["length"] = dist(lat1, lon1, lat2, lon2)
+            way_data["length"] = haversine(lat1, lon1, lat2, lon2)
         else:
             continue
 
@@ -135,7 +160,7 @@ def create_graph(osm_file, n, r):
             continue
 
         # avg_time calculation from speeds map
-        speed = random.choice(avg_speeds[way_data["road_type"]])
+        speed = random.choice(avg_speeds[way_data["road_type"]]) * 3.6    # conversion to m/s
         way_data["average_time"] = way_data["length"]/ speed
 
         if random.randint(1,3) == 1:
@@ -146,11 +171,6 @@ def create_graph(osm_file, n, r):
 
         data["edges"].append(way_data)
 
-    poi_candidates = random.sample(data["nodes"],
-                                k=max(1, len(data["nodes"]) // 2))
-    for node in poi_candidates:
-        num_pois = random.randint(1, 3)          # 1-to-3 POIs
-        node["pois"] = random.sample(place_tags, k=num_pois)
     return data
 
 
@@ -158,6 +178,7 @@ def generate_query(graph_data, q_type, id):
     
     nodes = graph_data["nodes"]
     edges = graph_data["edges"]
+    edge_rts = {e["id"]: e["road_type"] for e in edges}
 
     query = {"id": id}
 
@@ -169,9 +190,9 @@ def generate_query(graph_data, q_type, id):
 
         if random.randint(1,1000)%2:
             query["constraints"] = {}
-            if random.randint(1,1000)%2:
+            if random.randint(1,10) < 4:
                 query["constraints"]["forbidden_nodes"] = generate_forbidden_nodes(nodes)
-            if random.randint(1,1000)%2:
+            if random.randint(1,10) < 4:
                 query["constraints"]["forbidden_road_types"] = generate_forbidden_road_types(road_tags)
     
     elif q_type == "knn":
@@ -180,7 +201,7 @@ def generate_query(graph_data, q_type, id):
         query_point = random.choice(nodes)
         query["query_point"] = {"lat": query_point["lat"], "lon": query_point["lon"]}
         query["metric"] = random.choice(metric)
-        query["k"] = random.randint(1, len(nodes)-1)
+        query["k"] = random.randint(1, len(nodes) // 5)
     
     elif q_type == "r":
         query["type"] = "remove_edge"
@@ -198,13 +219,13 @@ def generate_query(graph_data, q_type, id):
                 query["patch"]["length"] = round(random.uniform(20.0, 300.0), 6)
             if random.randint(1, 1000)%2:
                 query["patch"]["average_time"] = round(random.uniform(1.0, 10.0), 6)
-            if random.randint(1, 1000)%2:
+            if random.randint(1, 10) < 5:
                 query["patch"]["road_type"] = random.choice(road_tags)
-            if random.randint(1, 1000)%2:
+            if random.randint(1, 3) == 1:
                 if "road_type" in query["patch"]:
                     rt = query["patch"]["road_type"]
                 else:
-                    rt = next((e["road_type"] for e in edges if e["id"] == query["edge_id"]), None)
+                    rt = edge_rts[query["edge_id"]]
                 del_val = delta[rt]
                 avg_speed = random.choice(avg_speeds[rt])
                 query["patch"]["speed_profile"] = [round(avg_speed + random.uniform(-del_val/2,del_val), 6) for i in range(96)]
@@ -212,10 +233,10 @@ def generate_query(graph_data, q_type, id):
     return query
 
 if __name__ == "__main__":
-    input_file = "./Maps/map3.osm"
+    input_file = "../Maps/map3.osm"
 
     for r in range(10):
-        folder = f"./Phase-1/testcases/test{r+1}"
+        folder = f"./testcases/test{r+1}"
         os.makedirs(folder, exist_ok=True)
 
         output_file_g = f"{folder}/graph.json"
@@ -231,9 +252,3 @@ if __name__ == "__main__":
             queries["events"].append(query)
         with open(output_file_q, "w", encoding="utf-8") as f:
                     json.dump(queries, f, ensure_ascii=False, indent=2)
-
-
-
-
-
-

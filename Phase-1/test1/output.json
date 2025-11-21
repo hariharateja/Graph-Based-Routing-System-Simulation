@@ -1,0 +1,56 @@
+{
+    "meta": {
+        "id": "qset1"
+    },
+    "results": [
+        {
+            "id": 1,
+            "minimum_distance": 150.0,
+            "path": [
+                0,
+                2
+            ],
+            "possible": true,
+            "processing_time": 0.016403
+        },
+        {
+            "id": 2,
+            "minimum_distance": 350.0,
+            "path": [
+                0,
+                2,
+                3
+            ],
+            "possible": true,
+            "processing_time": 0.005553
+        },
+        {
+            "id": 3,
+            "possible": false,
+            "processing_time": 0.005407
+        },
+        {
+            "id": 4,
+            "nodes": [
+                4
+            ],
+            "processing_time": 0.00773
+        },
+        {
+            "done": true,
+            "id": 5,
+            "processing_time": 0.004567
+        },
+        {
+            "id": 6,
+            "minimum_distance": 220.0,
+            "path": [
+                0,
+                1,
+                2
+            ],
+            "possible": true,
+            "processing_time": 0.003053
+        }
+    ]
+}
