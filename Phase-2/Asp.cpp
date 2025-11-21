@@ -20,7 +20,7 @@ static int asp_num_landmarks = 32; // number of landmarks
 static std::vector<int> asp_landmarks; // landmark node ids
 static std::vector<std::vector<double>> asp_distFromLandmarks; // dist from landmarks
 
-static void asp_dijsktra(const Graph& graph, int source, std::vector<double>& dist) {
+void asp_dijsktra(const Graph& graph, int source, std::vector<double>& dist) {
     dist.clear();
     dist.resize(graph.getAllNodeIds().size(), INF);
     dist[source] = 0.0;
