@@ -4,6 +4,25 @@
 #include <set>
 #include <algorithm>  // Add this for std::reverse
 
+double get_heuristic(const Graph& graph, int u, int target, const std::string& mode){
+    const Node& n_u = graph.getNode(u);
+    const Node& n_t = graph.getNode(target);
+
+    const double METERS_PER_DEGREE = 111000.0;
+
+    double dx = n_u.lat - n_t.lat;
+    double dy = n_u.lon - n_t.lon;
+    double dist_meters = std::sqrt(dx*dx + dy*dy) * METERS_PER_DEGREE;
+
+    if (mode == "distance"){
+        return dist_meters;
+    }
+    else{
+        const double MAX_SPEED_MPS = 36.0; 
+        return dist_meters / MAX_SPEED_MPS;
+    }
+}
+
 struct CompareCost{
     bool operator()(const std::pair<double,int>& a, const std::pair<double,int>& b) {
         return a.first > b.first; 
@@ -70,49 +89,57 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
         return result;
     }
 
-    std::map<int, double> cost;
+    std::map<int, double> g_score;
     std::map<int, int> parent;
     std::priority_queue<std::pair<double,int>, std::vector<std::pair<double,int>>, CompareCost> pq;
 
-    cost[start] = 0;
-    pq.push({0.0, start});
+    g_score[start] = 0.0;
+    double start_f = get_heuristic(graph, start, end, mode);
+    pq.push({start_f, start});
 
     bool path_found = false;
 
     while(!pq.empty()){
-        double currentCost = pq.top().first;
-        int currentNode = pq.top().second;
+        double current_f = pq.top().first;
+        int u = pq.top().second;
         pq.pop();
 
-        if (cost.count(currentNode) && currentCost > cost[currentNode]) {
-            continue; 
+        if (g_score.count(u) && current_f > g_score[u] + get_heuristic(graph, u, end, mode) + 0.0001) {
+             continue; 
         }
         
-        if (currentNode == end) {
+        if (u == end) {
             path_found = true;
             break;
         }
 
-        for (int edgeId : graph.getNeighborEdges(currentNode)){
+        for (int edgeId : graph.getNeighborEdges(u)){
             const Edge& edge = graph.getEdge(edgeId);
             if (forbidden_road_types.count(edge.road_type)) continue;
             
-            int neighborNode = (edge.u == currentNode) ? edge.v : edge.u;
+            int v = (edge.u == u) ? edge.v : edge.u;
             
-            if (forbidden_nodes.count(neighborNode)) continue;
+            if (forbidden_nodes.count(v)) continue;
             
+            // --- Calculate Edge Cost ---
             double edgeCost = 0.0;
             if (mode == "distance") {
                 edgeCost = edge.length;
             } else {
-                edgeCost = calculateTravelTime(edge, currentCost);
+                // Crucial: Pass g_score[u] (current time), NOT current_f
+                edgeCost = calculateTravelTime(edge, g_score[u]); 
             }
-            double newCost = currentCost + edgeCost;
+            
+            double tentative_g = g_score[u] + edgeCost;
 
-            if (!cost.count(neighborNode) || newCost < cost[neighborNode]){
-                cost[neighborNode] = newCost;
-                parent[neighborNode] = currentNode;
-                pq.push({newCost, neighborNode});
+            // If a shorter path to v is found
+            if (!g_score.count(v) || tentative_g < g_score[v]){
+                g_score[v] = tentative_g;
+                parent[v] = u;
+                
+                // A* Priority = New G + Heuristic to Target
+                double f_new = tentative_g + get_heuristic(graph, v, end, mode);
+                pq.push({f_new, v});
             }
         }
     }
@@ -122,8 +149,8 @@ ShortestPathResult findShortestPath(const Graph& graph, const json& query){
     
     if (path_found){
         result.possible = true;
-        result.minimum_distance = (mode == "distance") ? cost[end] : -1.0;
-        result.minimum_time = (mode == "time") ? cost[end] : -1.0;
+        result.minimum_distance = (mode == "distance") ? g_score[end] : -1.0;
+        result.minimum_time = (mode == "time") ? g_score[end] : -1.0;
         
         int currentNode = end;
         while (currentNode != start) {

@@ -20,7 +20,7 @@ phase1: $(PHASE1_SOURCES)
 
 # Target for Phase 2 executable
 phase2: $(PHASE2_SOURCES) 
-	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(PHASE2_SOURCES) -o phase2
+	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(PHASE2_SOURCES) $(PHASE1_LIB) -o phase2
 
 # Target for Phase 3 executable
 phase3: $(PHASE3_SOURCES) 
