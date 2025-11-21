@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "id": "qset6"
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "shortest_path",
+      "source": 15,
+      "target": 130,
+      "mode": "time",
+      "constraints": {}
+    },
+    {
+      "id": 2,
+      "type": "knn",
+      "poi": "hospital",
+      "query_point": {
+        "lat": 12.972299,
+        "lon": 77.609622
+      },
+      "metric": "euclidean",
+      "k": 50
+    },
+    {
+      "id": 3,
+      "type": "remove_edge",
+      "edge_id": 238459130
+    },
+    {
+      "id": 4,
+      "type": "shortest_path",
+      "source": 187,
+      "target": 258,
+      "mode": "time"
+    },
+    {
+      "id": 5,
+      "type": "modify_edge",
+      "edge_id": 1307397842,
+      "patch": {
+        "average_time": 6.845111,
+        "road_type": "primary"
+      }
+    },
+    {
+      "id": 6,
+      "type": "shortest_path",
+      "source": 329,
+      "target": 329,
+      "mode": "distance"
+    },
+    {
+      "id": 7,
+      "type": "modify_edge",
+      "edge_id": 1308654713
+    },
+    {
+      "id": 8,
+      "type": "remove_edge",
+      "edge_id": 362431396
+    },
+    {
+      "id": 9,
+      "type": "shortest_path",
+      "source": 239,
+      "target": 478,
+      "mode": "distance"
+    },
+    {
+      "id": 10,
+      "type": "knn",
+      "poi": "pharmacy",
+      "query_point": {
+        "lat": 12.984303,
+        "lon": 77.599829
+      },
+      "metric": "shortest_path",
+      "k": 17
+    }
+  ]
+}
