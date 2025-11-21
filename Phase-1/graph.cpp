@@ -58,29 +58,55 @@ void Graph::loadFromJson(const json& graphData) {
     buildAdjacencyList();
 }
 
-void Graph::removeEdge(int edgeId) {
+bool Graph::removeEdge(int edgeId) {
     if (m_edges.count(edgeId)) {
-        Edge e = m_edges[edgeId];
-        auto& vec = m_adjList[e.u];
-        vec.erase(std::remove(vec.begin(),vec.end(),e.id),vec.end());
+        Edge& e = m_edges[edgeId];
+        auto& vec1 = m_adjList[e.u];
+        auto itr = std::remove(vec1.begin(),vec1.end(),e.id);
+
+        if(itr == vec1.end()) return false; // already removed edge
+
+        vec1.erase(itr,vec1.end());
         if(!e.oneway){
-            auto& vec = m_adjList[e.v];
-            vec.erase(std::remove(vec.begin(),vec.end(),e.id),vec.end());
+            auto& vec2 = m_adjList[e.v];
+            vec2.erase(std::remove(vec2.begin(),vec2.end(),e.id),vec2.end());
         }
+        return true;
+    }
+    else {
+        return false;
     }
 }
 
-void Graph::modifyEdge(int edgeId, const json& patch) {
+bool Graph::modifyEdge(const json& event) {
+    int edgeId = event.at("edge_id");
     if (m_edges.count(edgeId)) {
         Edge& e = m_edges[edgeId];
         auto& vec = m_adjList[e.u];
-        if (patch.contains("length")) e.length = patch.at("length"); // if there is patch
-        if (patch.contains("average_time")) e.average_time = patch.at("average_time");
-        if (patch.contains("speed_profile")) e.speed_profile = patch.at("speed_profile").get<std::vector<double>>();
-        if (std::find(vec.begin(),vec.end(),e.id) == vec.end()){ // if the edge was disabled
+
+        bool disabled = false;
+        if (std::find(vec.begin(),vec.end(),e.id) == vec.end()) { // if the edge was disabled
             vec.push_back(e.id);
             if(!e.oneway) m_adjList[e.v].push_back(e.id);
+            disabled = true;
         }
+        
+        // if no patch nor enabling an edge
+        if(!disabled && (!event.contains("patch") || event.at("patch").empty())){
+            return false;
+        }
+        
+        // if there is patch
+        const json patch = event.at("patch");
+
+        if (patch.contains("length")) e.length = patch.at("length");
+        if (patch.contains("average_time")) e.average_time = patch.at("average_time");
+        if (patch.contains("speed_profile")) e.speed_profile = patch.at("speed_profile").get<std::vector<double>>();
+        
+        return true;
+    }
+    else {
+        return false;
     }
 }
 
