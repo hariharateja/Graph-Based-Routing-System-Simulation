@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "id": "qset1"
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "shortest_path",
+      "source": 19,
+      "target": 7,
+      "mode": "time",
+      "constraints": {
+        "forbidden_road_types": [
+          "local",
+          "tertiary",
+          "secondary"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "knn",
+      "poi": "petrol station",
+      "query_point": {
+        "lat": 12.970902,
+        "lon": 77.604807
+      },
+      "metric": "euclidean",
+      "k": 2
+    },
+    {
+      "id": 3,
+      "type": "remove_edge",
+      "edge_id": 1297594196
+    },
+    {
+      "id": 4,
+      "type": "shortest_path",
+      "source": 19,
+      "target": 16,
+      "mode": "distance",
+      "constraints": {
+        "forbidden_nodes": [
+          2,
+          1,
+          12,
+          4
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "modify_edge",
+      "edge_id": 1246410563
+    },
+    {
+      "id": 6,
+      "type": "shortest_path",
+      "source": 18,
+      "target": 13,
+      "mode": "time",
+      "constraints": {}
+    },
+    {
+      "id": 7,
+      "type": "modify_edge",
+      "edge_id": 1246410563,
+      "patch": {
+        "average_time": 2.163651
+      }
+    },
+    {
+      "id": 8,
+      "type": "remove_edge",
+      "edge_id": 1246410563
+    },
+    {
+      "id": 9,
+      "type": "shortest_path",
+      "source": 18,
+      "target": 7,
+      "mode": "time"
+    },
+    {
+      "id": 10,
+      "type": "knn",
+      "poi": "petrol station",
+      "query_point": {
+        "lat": 12.969331,
+        "lon": 77.600504
+      },
+      "metric": "euclidean",
+      "k": 4
+    }
+  ]
+}
