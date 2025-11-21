@@ -7,14 +7,33 @@
 
 // the idea here is popping largest distances until there are k nodes with "least priority" are left 
 
-double SquaredDist(double lat1, double lon1, double lat2, double lon2) {
-    return pow(lat1 - lat2, 2) + pow(lon1 - lon2, 2);
+double haversine(double lat1, double lon1, double lat2, double lon2) {
+    const double pi = 3.141593;
+    const double R = 6371000.0; // in meters
+    // convert degrees to radians
+    lat1 *= (pi/180);
+    lat2 *= (pi/180);
+    lon1 *= (pi/180);
+    lon2 *= (pi/180);
+
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
+
+    double a = std::sin(dlat / 2.0) * std::sin(dlat / 2.0) +
+               (std::cos(lat1) * std::cos(lat2) *
+               std::sin(dlon / 2.0) * std::sin(dlon / 2.0));
+
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1.0 - a));
+
+    return R * c; // in meters
 }
+
 struct CompareCost {
     bool operator()(const std::pair<double,int>& a, const std::pair<double,int>& b) {
         return a.first > b.first; 
     }
 };
+
 json findKnn(const Graph& graph, const json& query){
     // type is not required here
     int queryId = query.at("id");
@@ -43,7 +62,7 @@ json findKnn(const Graph& graph, const json& query){
                 }
             }
             if(typeMatch){
-                double dist = SquaredDist(qLat, qLon, node.lat, node.lon);
+                double dist = haversine(qLat, qLon, node.lat, node.lon);
                 if (pq.size() < k){
                     pq.push({dist, nodeId});
                 }
@@ -67,7 +86,7 @@ json findKnn(const Graph& graph, const json& query){
         // so we are checking the nearest neighbours, if it is the node itself, then no issue;
         for(int nodeId : graph.getAllNodeIds()){
             const Node& node = graph.getNode(nodeId);
-            double dist = SquaredDist(qLat , qLon , node.lat ,node.lon);
+            double dist = haversine(qLat , qLon , node.lat ,node.lon);
             if(dist < min_dist){
                 min_dist = dist;
                 start = nodeId;

@@ -7,6 +7,7 @@ INCLUDES = -IPhase-1 -IPhase-2 -IPhase-3 -Iinclude
 PHASE1_SOURCES = $(wildcard ./Phase-1/*.cpp)
 PHASE2_SOURCES = $(wildcard ./Phase-2/*.cpp)
 PHASE3_SOURCES = $(wildcard ./Phase-3/*.cpp)
+PHASE1_LIB = $(filter-out ./Phase-1/main.cpp ./Phase-1/processquery.cpp, $(PHASE1_SOURCES))
 
 # --- Targets ---
 .PHONY: all phase1 phase2 phase3 clean
@@ -15,15 +16,15 @@ all: phase1 phase2 phase3
 
 # Target for Phase 1 executable
 phase1: $(PHASE1_SOURCES) 
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=1  $(PHASE1_SOURCES) -o phase1
+	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(PHASE1_SOURCES) -o phase1
 
 # Target for Phase 2 executable
-phase2: $(PHASE2_SOURCES) SampleDriver.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=2 SampleDriver.cpp $(PHASE2_SOURCES) -o phase2
+phase2: $(PHASE2_SOURCES) 
+	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(PHASE2_SOURCES) -o phase2
 
 # Target for Phase 3 executable
-phase3: $(PHASE3_SOURCES) SampleDriver.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=3 SampleDriver.cpp $(PHASE3_SOURCES) -o phase3
+phase3: $(PHASE3_SOURCES) 
+	$(CXX) $(CXXFLAGS) $(INCLUDES)  $(PHASE3_SOURCES) $(PHASE1_LIB) -o phase3
 
 clean:
 	rm -f phase1 phase2 phase3

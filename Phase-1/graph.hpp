@@ -37,8 +37,8 @@ class Graph {
 
   public:
     void loadFromJson(const json& graphData);
-    void removeEdge(int edgeId);
-    void modifyEdge(int edgeId, const json& patch);
+    bool removeEdge(int edgeId);
+    bool modifyEdge(const json& event);
     /*
         here in this, these are accessible by user, they should be handled carefully, we are returning a reference for speed and 
         since we are returning the reference there is chance of chaning internal data. To make sure they are safe we used const 
