@@ -94,9 +94,37 @@ std::tuple<int, int, bool> find_min_max_move(
             }
 
             // is drop-off valid ??
-            
+            else if (!order.is_delivered){
+                if (std::find(driver.carried_orders.begin(), driver.carried_orders.end(), order.id) != driver.carried_orders.end()) {
+                    if (dist_matrix.at(current_node).count(order.dropoff)) {
+                        travel_cost = dist_matrix.at(current_node).at(order.dropoff);
+                        is_pickup = false;
+                    }
+                }
+            }
+
+            if (travel_cost != std::numeric_limits<double>::max()){
+                // logic 
+                double potential_finish_time = driver.current_time + travel_cost;
+
+                double new_max_time = 0.0;
+                if (potential_finish_time > current_max_driver_time){
+                    new_max_time = potential_finish_time;
+                }
+                else{
+                    new_max_time = current_max_driver_time;
+                }
+
+                if (new_max_time < min_overall_max_time){
+                    min_overall_max_time = new_max_time;
+                    best_driver_idx = d_idx;
+                    best_order_idx = o_idx;
+                    best_is_pickup = is_pickup;
+                }
+            }
         }
     }
+    return {best_driver_idx, best_order_idx, best_is_pickup};
 }
 json solve_delivery_scheduling(const Graph& graph, const json& query){
     int depot = query["fleet"]["depot_node"];
