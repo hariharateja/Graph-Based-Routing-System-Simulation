@@ -6,6 +6,8 @@
 #include <map>
 #include <limits>
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 
 struct ComparePath {
