@@ -79,17 +79,17 @@ def create_graph(osm_file, n, r):
     id_map = {}
     index = 0
 
-    referenced_nodes = set()
-    for way in root.findall("way"):
-        for nd in way.findall("nd"):
-            referenced_nodes.add(nd.attrib["ref"])
+    # referenced_nodes = set()
+    # for way in root.findall("way"):
+    #     for nd in way.findall("nd"):
+    #         referenced_nodes.add(nd.attrib["ref"])
     
     # Parse all <node> elements
     for node in root.findall("node"):
         osm_id = node.attrib["id"]
 
-        if osm_id not in referenced_nodes:
-            continue
+        # if osm_id not in referenced_nodes:
+        #     continue
 
         if index >= n:
             break  # stop at 'n' nodes
@@ -160,7 +160,7 @@ def create_graph(osm_file, n, r):
             continue
 
         # avg_time calculation from speeds map
-        speed = random.choice(avg_speeds[way_data["road_type"]]) * 3.6    # conversion to m/s
+        speed = random.choice(avg_speeds[way_data["road_type"]])
         way_data["average_time"] = way_data["length"]/ speed
 
         if random.randint(1,3) == 1:
@@ -201,7 +201,7 @@ def generate_query(graph_data, q_type, id):
         query_point = random.choice(nodes)
         query["query_point"] = {"lat": query_point["lat"], "lon": query_point["lon"]}
         query["metric"] = random.choice(metric)
-        query["k"] = random.randint(1, len(nodes) // 5)
+        query["k"] = random.randint(1, len(nodes) // 4)
     
     elif q_type == "r":
         query["type"] = "remove_edge"
