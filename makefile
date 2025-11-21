@@ -18,7 +18,7 @@ phase1: $(PHASE1_SOURCES)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=1  $(PHASE1_SOURCES) -o phase1
 
 # Target for Phase 2 executable
-phase2: $(PHASE2_SOURCES) SampleDriver.cpp
+phase2: $(PHASE2_SOURCES) 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPHASE=2 SampleDriver.cpp $(PHASE2_SOURCES) -o phase2
 
 # Target for Phase 3 executable
