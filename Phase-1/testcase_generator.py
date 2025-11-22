@@ -1,254 +1,262 @@
-import os
-import xml.etree.ElementTree as ET
 import json
 import random
-from math import radians, sin, cos, atan2, sqrt
+import math
+import os
+from typing import List, Dict, Any, Tuple
 
 
-testcases = [20, 30, 50, 100, 300, 500, 1000, 2500, 5000, 100000]
+POI_TAGS: List[str] = ["restaurant", "petrol station", "hospital", "pharmacy", "hotel", "atm"]
+ROAD_TYPES: List[str] = ["primary", "secondary", "tertiary", "local", "expressway"]
 
-place_tags = ["restaurant", "petrol station", "hospital", "pharmacy", "hotel", "atm"]
+MAX_SPEED_MPS: float = 36.0
+SECONDS_PER_DAY: int = 86400
+SLOTS_PER_DAY: int = 96
+SECONDS_PER_SLOT: int = 900 # 15 minutes
 
-road_tags = ["primary", "secondary", "tertiary", "local", "expressway"]
-
-# speeds in kmph
-avg_speeds = {
-    "expressway": [22,23,24,25,26,27,28],
-    "primary":[17,18,19,20,21,22],
-    "secondary":[11,12,13,14,15,16,17],
-    "tertiary":[8,9,10,11,12,13,14],
-    "local": [6,7,8,9]
-}
-
-delta = {
-    "expressway": 6,
-    "primary": 4,
-    "secondary": 2,
-    "tertiary": 1,
-    "local": 3
-}
-
-mode = ["distance", "time"]
-
-metric = ["euclidean", "shortest_path"]
-
-query_order = ["s", "knn", "r", "s", "m", "s", "m", "r", "s", "knn"]
+global_edge_id_counter: int = 10000 
 
 
-def haversine(lat1, lon1, lat2, lon2): # from ai
-    # convert degrees → radians
-    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-
-    # Earth radius in meters
-    R = 6371000  
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculates the distance between two points in meters using Haversine formula."""
+    R_earth = 6371000.0  # Earth radius in meters
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
 
     dlat = lat2 - lat1
     dlon = lon2 - lon1
 
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    return R * c
+    return R_earth * c
 
+def generate_speed_profile(road_type: str) -> List[float]:
+    """Creates a realistic 96-slot speed profile based on road type characteristics."""
+    # Base speeds and deviation ranges (in m/s)
+    speed_params = {
+        "expressway": (28.0, 7.0),
+        "primary": (20.0, 5.0),
+        "secondary": (15.0, 4.0),
+        "tertiary": (10.0, 3.0),
+        "local": (6.0, 2.0)
+    }
+    
+    base_speed, max_dev = speed_params.get(road_type, (15.0, 4.0))
 
+    profile: List[float] = []
+    for i in range(SLOTS_PER_DAY):
+        hour = i * 15 // 60
+        
+        if 8 <= hour <= 10 or 17 <= hour <= 19:
+            
+            speed_factor = random.uniform(0.5, 0.7) 
+        else:
+            # Normal traffic
+            speed_factor = random.uniform(0.8, 1.2)
 
-def generate_forbidden_nodes(nodes):
-    size = random.randint(1, len(nodes)//5) # //5 suggested by AI so that atmax 20% of the nodes are forbidden
-    return [n["id"] for n in random.sample(nodes, size)]
+        speed = base_speed * speed_factor
+        
+        # Ensure speed is reasonable, avoid negative or zero
+        profile.append(max(1.0, round(speed, 2))) 
+        
+    return profile
 
-def generate_forbidden_road_types(road_tags):
-    size = random.randint(1, len(road_tags)-1)
-    return random.sample(road_tags, size)
+def generate_synthetic_graph(num_nodes: int, node_density: float = 0.05, g: int = 0) -> Dict[str, Any]:
+    """Generates a graph with random geographic coordinates and guaranteed node connections."""
+    
+    global global_edge_id_counter
+    nodes: List[Dict[str, Any]] = []
+    
+    # Mumbai area coordinates used for realistic scale
+    BASE_LAT, BASE_LON = 19.07, 72.87 
+    
+    for i in range(num_nodes):
+        lat = BASE_LAT + (random.random() - 0.5) * 0.05
+        lon = BASE_LON + (random.random() - 0.5) * 0.05
+        
+        pois = []
+        if random.random() < 0.35: 
+            pois = random.sample(POI_TAGS, random.randint(1, 2))
+            
+        nodes.append({
+            "id": i,
+            "lat": round(lat, 6),
+            "lon": round(lon, 6),
+            "pois": pois
+        })
 
+    edges: List[Dict[str, Any]] = []
+    used_connections: set[Tuple[int, int]] = set()
 
-def create_graph(osm_file, n, r):
-    tree = ET.parse(osm_file)
-    root = tree.getroot()
+    for i in range(num_nodes):
+        
+        num_neighbors = max(1, int(num_nodes * node_density))
+        
+        for _ in range(num_neighbors):
+            v = random.randint(0, num_nodes - 1)
+            if i == v: continue
+            
+            u, v_sorted = min(i, v), max(i, v)
+            if (u, v_sorted) in used_connections: continue
+            used_connections.add((u, v_sorted))
+            
+            road_type = random.choice(ROAD_TYPES)
+            
+            # Using Haversine for accurate distance calculation
+            length = haversine_distance(nodes[i]["lat"], nodes[i]["lon"], 
+                                        nodes[v]["lat"], nodes[v]["lon"])
+            
+            length = max(50.0, min(1000.0, length))
+            
+            speed_profile = generate_speed_profile(road_type)
+            
+            avg_speed_mps = sum(speed_profile) / len(speed_profile)
+            average_time = length / avg_speed_mps
+            
+            
+            edges.append({
+                "id": global_edge_id_counter,
+                "u": i,
+                "v": v,
+                "length": round(length, 4),
+                "average_time": round(average_time, 4),
+                "speed_profile": speed_profile,
+                "oneway": random.random() < 0.4, # 40% chance of being one-way
+                "road_type": road_type
+            })
+            global_edge_id_counter += 1
 
-    data = {
-        "meta" : {},
-        "nodes": [],
-        "edges": []
+    return {
+        "meta": {
+            "id": f"sample_testcase_{g}",
+            "nodes": num_nodes,
+            "description": "Instructor-provided map for course project"
+        },
+        "nodes": nodes,
+        "edges": edges
     }
 
-    data["meta"]["id"] = f"sample_testcase_{r}"
-    data["meta"]["nodes"] = n
-    data["meta"]["description"] = f"sample_set_{r}"
 
-    node_map = {}  # node_id → (lat, lon)
-    id_map = {}
-    index = 0
+def generate_random_query(graph_data: Dict[str, Any], query_type: str, query_id: int) -> Dict[str, Any]:
 
-    # referenced_nodes = set()
-    # for way in root.findall("way"):
-    #     for nd in way.findall("nd"):
-    #         referenced_nodes.add(nd.attrib["ref"])
-    
-    # Parse all <node> elements
-    for node in root.findall("node"):
-        osm_id = node.attrib["id"]
-
-        # if osm_id not in referenced_nodes:
-        #     continue
-
-        if index >= n:
-            break  # stop at 'n' nodes
-
-
-        node_map[osm_id] = (round(float(node.attrib["lat"]), 6), round(float(node.attrib["lon"]), 6))
-
-        node_data = {
-            "id": index,
-            "lat": round(float(node.attrib["lat"]), 6),
-            "lon": round(float(node.attrib["lon"]), 6),
-            "pois": []
-        }
-        
-        # if the places are relevant
-        for tag in node.findall("tag"):
-            if tag.attrib["v"] in place_tags:
-                node_data["pois"].append(tag.attrib["v"])
-        # since the graph is too random, mostly we don't have any 
-        if not len(node_data["pois"]):
-            if random.randint(1, 10) > 4:
-                node_data["pois"].append(random.choice(place_tags))
-                if random.randint(1, 10) > 6:
-                    node_data["pois"].append(random.choice(place_tags))
-                    if random.randint(1, 10) > 8:
-                        node_data["pois"].append(random.choice(place_tags))
-
-        id_map[osm_id] = index
-        index += 1
-        data["nodes"].append(node_data)
-
-    # Parse all <way> elements
-    for way in root.findall("way"):
-        way_data = {
-            "id": int(way.attrib.get("id")),
-            "u": None,
-            "v": None,
-            "length": 0.0,
-            "average_time": 0.0,
-            "oneway": False,
-            "road_type": None
-        }
-
-        # check if valid edges wrt end nodes
-        nd_refs = [nd.attrib["ref"] for nd in way.findall("nd")]
-        if len(nd_refs) >= 2:
-            u = nd_refs[0]
-            v = nd_refs[-1]
-        else:
-            continue
-        if u in node_map and v in node_map:
-            way_data["u"] = id_map[u]
-            way_data["v"] = id_map[v]
-            lat1, lon1 = node_map[u]
-            lat2, lon2 = node_map[v]
-            way_data["length"] = haversine(lat1, lon1, lat2, lon2)
-        else:
-            continue
-
-        # check for tags first since we are finding avg time of edge wrt road_type
-        for tag in way.findall("tag"):
-            if tag.attrib["k"] == "oneway":
-                way_data["oneway"] = True
-            if tag.attrib["k"] == "highway" and tag.attrib["v"] in road_tags:
-                way_data["road_type"] = tag.attrib["v"]
-        
-        if way_data["road_type"] == None:
-            continue
-
-        # avg_time calculation from speeds map
-        speed = random.choice(avg_speeds[way_data["road_type"]])
-        way_data["average_time"] = way_data["length"]/ speed
-
-        if random.randint(1,3) == 1:
-            rt = way_data["road_type"]
-            del_val = delta[rt]
-            avg_speed = random.choice(avg_speeds[way_data["road_type"]])
-            way_data["speed_profile"] = [round(avg_speed + random.uniform(-del_val/2,del_val), 6) for i in range(96)]
-
-        data["edges"].append(way_data)
-
-    return data
-
-
-def generate_query(graph_data, q_type, id):
-    
     nodes = graph_data["nodes"]
     edges = graph_data["edges"]
-    edge_rts = {e["id"]: e["road_type"] for e in edges}
-
-    query = {"id": id}
-
-    if q_type == "s":
-        query["type"] = "shortest_path"
-        query["source"] = random.choice(nodes)["id"]
-        query["target"] = random.choice(nodes)["id"]
-        query["mode"] = random.choice(mode)
-
-        if random.randint(1,1000)%2:
-            query["constraints"] = {}
-            if random.randint(1,10) < 4:
-                query["constraints"]["forbidden_nodes"] = generate_forbidden_nodes(nodes)
-            if random.randint(1,10) < 4:
-                query["constraints"]["forbidden_road_types"] = generate_forbidden_road_types(road_tags)
     
-    elif q_type == "knn":
-        query["type"] =q_type
-        query["poi"] = random.choice(place_tags)
-        query_point = random.choice(nodes)
-        query["query_point"] = {"lat": query_point["lat"], "lon": query_point["lon"]}
-        query["metric"] = random.choice(metric)
-        query["k"] = random.randint(1, len(nodes) // 4)
-    
-    elif q_type == "r":
-        query["type"] = "remove_edge"
-        edge_ids = [e["id"] for e in edges]
-        query["edge_id"] = random.choice(edge_ids)
+    if not nodes or not edges:
+        return {"id": query_id, "type": query_type, "error": "Graph data is empty"}
 
-    else:
-        query["type"] = "modify_edge"
-        edge_ids = [e["id"] for e in edges]
-        query["edge_id"] = random.choice(edge_ids)
+    query: Dict[str, Any] = {"id": query_id, "type": query_type}
+    
+    # Shortest Path Query 
+    if query_type == "shortest_path":
         
-        if random.randint(1, 1000)%2:
-            query["patch"] = {}
-            if random.randint(1, 1000)%2:
-                query["patch"]["length"] = round(random.uniform(20.0, 300.0), 6)
-            if random.randint(1, 1000)%2:
-                query["patch"]["average_time"] = round(random.uniform(1.0, 10.0), 6)
-            if random.randint(1, 10) < 5:
-                query["patch"]["road_type"] = random.choice(road_tags)
-            if random.randint(1, 3) == 1:
-                if "road_type" in query["patch"]:
-                    rt = query["patch"]["road_type"]
-                else:
-                    rt = edge_rts[query["edge_id"]]
-                del_val = delta[rt]
-                avg_speed = random.choice(avg_speeds[rt])
-                query["patch"]["speed_profile"] = [round(avg_speed + random.uniform(-del_val/2,del_val), 6) for i in range(96)]
+        src_node, tgt_node = random.sample(nodes, 2)
+        
+        query["source"] = src_node["id"]
+        query["target"] = tgt_node["id"]
+        query["mode"] = random.choice(["distance", "time"])
+        
+        if random.random() < 0.4:
+            constraints: Dict[str, Any] = {}
+            if random.random() < 0.6: # 60% chance to add forbidden nodes
+                size = random.randint(1, max(1, len(nodes) // 10))
+                forbidden_nodes = [n["id"] for n in random.sample(nodes, size)]
+                constraints["forbidden_nodes"] = forbidden_nodes
+            if random.random() < 0.5: # 50% chance to add forbidden roads
+                forbidden_roads = random.sample(ROAD_TYPES, random.randint(1, 2))
+                constraints["forbidden_road_types"] = forbidden_roads
+            
+            if constraints:
+                query["constraints"] = constraints
+
+    # KNN Query 
+    elif query_type == "knn":
+        query["poi"] = random.choice(POI_TAGS)
+        query_point = random.choice(nodes)
+        
+        query["query_point"] = {"lat": query_point["lat"], "lon": query_point["lon"]}
+        query["metric"] = random.choice(["euclidean", "shortest_path"])
+        query["k"] = random.randint(1, max(1, len(nodes) // 20)) # Small k value
+
+    #  Remove Edge 
+    elif query_type == "remove_edge":
+        query["edge_id"] = random.choice(edges)["id"]
+
+    #  Modify Edge (m)
+    elif query_type == "modify_edge":
+        edge_to_modify = random.choice(edges)
+        query["edge_id"] = edge_to_modify["id"]
+        
+        patch: Dict[str, Any] = {}
+        
+        # Randomly choose fields to modify
+        if random.random() < 0.4:
+            patch["length"] = round(edge_to_modify["length"] * random.uniform(0.8, 1.2), 4)
+        if random.random() < 0.4:
+            patch["average_time"] = round(edge_to_modify["average_time"] * random.uniform(0.8, 1.2), 4)
+        if random.random() < 0.4:
+            patch["road_type"] = random.choice(ROAD_TYPES)
+        if random.random() < 0.3:
+            # Change speed profile
+            rt = patch.get("road_type", edge_to_modify["road_type"])
+            patch["speed_profile"] = generate_speed_profile(rt)
+
+        if patch and random.random() > 0.05:
+         query["patch"] = patch
+    else:
+        if random.random() < 0.5:
+            query["patch"] = {} 
+        else:
+            pass
+
 
     return query
 
+
 if __name__ == "__main__":
-    input_file = "../Maps/map3.osm"
+    
+    TEST_SCENARIOS = [
+        (20, 50), 
+        (50 ,200),   
+        (100, 300),
+        (500, 1500),  
+        (1000,2500)
+    ]
+    
 
-    for r in range(10):
-        folder = f"./testcases/test{r+1}"
-        os.makedirs(folder, exist_ok=True)
+    QUERY_SEQUENCE = [
+        "shortest_path", "knn", "remove_edge", "shortest_path", 
+        "modify_edge", "shortest_path", "shortest_path", "remove_edge", 
+        "knn", "modify_edge", "shortest_path", "shortest_path"
+    ]
+    
+    base_dir = "./tests"
+    os.makedirs(base_dir, exist_ok=True)
+    i=1
+    for r_idx, (num_nodes, num_edges) in enumerate(TEST_SCENARIOS):
+        folder_name = f"{base_dir}/test{i}"
+        os.makedirs(folder_name, exist_ok=True)
+        print(f"Generating Test Case {r_idx + 1}: {num_nodes} nodes, {num_edges} edges...")
 
-        output_file_g = f"{folder}/graph.json"
-        osm_data = create_graph(input_file,testcases[r], r+1)
+        # 1. Generate Graph Data
+        graph_data = generate_synthetic_graph(num_nodes,g=i)
+        i=i+1
+        # 2. Write Graph File
+        output_file_g = f"{folder_name}/graph.json"
         with open(output_file_g, "w", encoding="utf-8") as f:
-            json.dump(osm_data, f, ensure_ascii=False, indent=2)
+            json.dump(graph_data, f, ensure_ascii=False, indent=2)
 
-        output_file_q = f"{folder}/query.json"
-        queries = {"meta": {"id": f"qset{r+1}"}, "events": []}
-
-        for e in range(10):
-            query = generate_query(osm_data, query_order[e], e+1)
+        # 3. Generate Queries
+        queries = {"meta": {"id": f"qset{r_idx + 1}"}, "events": []}
+        
+        query_id_counter = 1
+        for q_type in QUERY_SEQUENCE:
+            query = generate_random_query(graph_data, q_type, query_id_counter)
             queries["events"].append(query)
+            query_id_counter += 1
+            
+        # 4. Write Query File
+        output_file_q = f"{folder_name}/queries.json"
         with open(output_file_q, "w", encoding="utf-8") as f:
-                    json.dump(queries, f, ensure_ascii=False, indent=2)
+            json.dump(queries, f, ensure_ascii=False, indent=2)
+            
+        print(f"  -> Generated {len(queries['events'])} queries successfully.")
