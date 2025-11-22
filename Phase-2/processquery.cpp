@@ -4,11 +4,11 @@ json process_query(const json& q) {
     std::string type = q.at("type");
 
     if (type == "k_shortest_paths") {
-        return findKsp_exact(graph, q);           // your exact Yen's or similar
+        return findKsp_exact(graph, q);
     } else if (type == "k_shortest_paths_heuristic") {
-        return findKsp_heuristic(graph, q);       // your ESX-MinW heuristic
+        return findKsp_heuristic(graph, q);
     } else if (type == "approx_shortest_path") {
-        return findAsp(graph, q);                 // your ALT-based ASP
+        return findAsp(graph, q);
     } else {
         json out;
         out["id"] = q.value("id", -1);
