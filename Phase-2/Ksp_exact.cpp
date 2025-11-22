@@ -86,10 +86,9 @@ Path A_star(const Graph& graph, int source, int target, const std::unordered_set
 
 
 
-//yens algorithm
+// Yens algorithm
 json findKsp_exact(const Graph& graph, const json& query) {
     // parse query
-    std::string type = query.at("type");
     int id = query.at("id");
     int source = query.at("source");
     int target = query.at("target");
