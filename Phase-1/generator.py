@@ -2,7 +2,6 @@ import json
 import random
 import math
 import os
-import argparse
 from typing import List, Dict, Any, Tuple
 
 
@@ -202,10 +201,12 @@ def generate_random_query(graph_data: Dict[str, Any], query_type: str, query_id:
             patch["speed_profile"] = generate_speed_profile(rt)
 
         if patch and random.random() > 0.05:
-             query["patch"] = patch
+         query["patch"] = patch
+    else:
+        if random.random() < 0.5:
+            query["patch"] = {} 
         else:
-            if random.random() < 0.5:
-                query["patch"] = {}
+            pass
 
 
     return query
@@ -228,7 +229,7 @@ if __name__ == "__main__":
         "knn", "modify_edge", "shortest_path", "shortest_path"
     ]
     
-    base_dir = "./Phase-1/tests"
+    base_dir = "./tests"
     os.makedirs(base_dir, exist_ok=True)
     i=1
     for r_idx, (num_nodes, num_edges) in enumerate(TEST_SCENARIOS):
