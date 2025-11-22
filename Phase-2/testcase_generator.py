@@ -6,10 +6,6 @@ from typing import List, Dict, Any
 import shutil
 
 
-# --------------------------------------------------------
-# CONSTANTS
-# --------------------------------------------------------
-
 POI_TAGS = ["restaurant", "petrol station", "hospital", "pharmacy", "hotel", "atm"]
 ROAD_TYPES = ["primary", "secondary", "tertiary", "local", "expressway"]
 global_edge_id_counter = 10000
@@ -23,23 +19,19 @@ avg_speeds = {
     "local": [6,7,8,9]
 }
 
-# --------------------------------------------------------
-# UTILITY: HAVERSINE DISTANCE
-# --------------------------------------------------------
-
-def haversine_distance(lat1, lon1, lat2, lon2):
-    R = 6371000.0
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculates the distance between two points in meters using Haversine formula."""
+    R_earth = 6371000.0  # Earth radius in meters
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+
     dlat = lat2 - lat1
     dlon = lon2 - lon1
-    a = math.sin(dlat/2)**2 + math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    return R * c
 
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-# --------------------------------------------------------
-# GRAPH GENERATION 
-# --------------------------------------------------------
+    return R_earth * c
+
 
 def generate_synthetic_graph(num_nodes: int, testcase_id: int):
     global global_edge_id_counter
@@ -115,10 +107,6 @@ def generate_synthetic_graph(num_nodes: int, testcase_id: int):
     }
 
 
-# --------------------------------------------------------
-# PHASE-2 QUERY GENERATION
-# --------------------------------------------------------
-
 def pick_two_nodes(graph):
     u, v = random.sample(graph["nodes"], 2)
     return u["id"], v["id"]
@@ -131,7 +119,7 @@ def make_ksp_exact(graph, qid):
         "id": qid,
         "source": s,
         "target": t,
-        "k": random.randint(2, 7),
+        "k": random.randint(2, 20),
         "mode": "distance"
     }
 
@@ -163,20 +151,16 @@ def make_approx_sp(graph, qid):
     }
 
 
-# --------------------------------------------------------
-# GENERATE 6 TESTCASES
-# --------------------------------------------------------
-
 def generate_phase2_tests(output_dir: str):
     random.seed(42)
 
-    TEST_NODE_SIZES = [50, 75, 100, 150, 300, 500]
+    TEST_NODE_SIZES = [50, 100, 150, 300, 500, 1000, 3000, 5000]
 
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
 
-    for i in range(6):
+    for i in range(8):
         test_id = i + 1
         folder = os.path.join(output_dir, f"test{test_id}")
         os.makedirs(folder, exist_ok=True)
@@ -188,12 +172,12 @@ def generate_phase2_tests(output_dir: str):
         with open(os.path.join(folder, "graph.json"), "w") as f:
             json.dump(graph, f, indent=2)
 
-        # ---- 12 QUERIES ----
+        # ---- 16 QUERIES ----
         QUERY_TYPES = ["ksp_exact", "ksp_heuristic", "approx_sp"]
         queries = {"meta": {"id": f"phase2_test_{test_id}"}, "events": []}
         qid = 1
 
-        for _ in range(12):
+        for _ in range(16):
             qt = random.choice(QUERY_TYPES)
             if qt == "ksp_exact":
                 queries["events"].append(make_ksp_exact(graph, qid))
@@ -208,10 +192,6 @@ def generate_phase2_tests(output_dir: str):
 
         print(f"✔ Generated test{test_id}")
 
-
-# --------------------------------------------------------
-# MAIN
-# --------------------------------------------------------
 
 if __name__ == "__main__":
     generate_phase2_tests("./testcases")
