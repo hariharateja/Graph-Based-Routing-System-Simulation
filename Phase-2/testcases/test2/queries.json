@@ -1,32 +1,123 @@
 {
-
-"meta" : {
-    "id" : "qset1"
-},
-"events" :[
-  {
-    "type": "k_shortest_paths",
-    "id": 1,
-    "source": 0,
-    "target": 3,
-    "k": 3,
-    "mode": "distance"
+  "meta": {
+    "id": "phase2_test_2"
   },
-  {
-    "type": "k_shortest_paths",
-    "id": 2,
-    "source": 1,
-    "target": 3,
-    "k": 4,
-    "mode": "distance"
-  },
-  {
-    "type": "k_shortest_paths",
-    "id": 3,
-    "source": 0,
-    "target": 3,
-    "k": 5,
-    "mode": "distance"
-  }
-]
+  "events": [
+    {
+      "type": "approx_shortest_path",
+      "id": 1,
+      "queries": [
+        {
+          "source": 31,
+          "target": 10
+        },
+        {
+          "source": 67,
+          "target": 57
+        },
+        {
+          "source": 67,
+          "target": 46
+        }
+      ],
+      "time_budget_ms": 5,
+      "acceptable_error_pct": 15.0
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 2,
+      "source": 7,
+      "target": 70,
+      "k": 6,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 3,
+      "source": 73,
+      "target": 68,
+      "k": 3,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 4,
+      "source": 41,
+      "target": 66,
+      "k": 5,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 5,
+      "source": 26,
+      "target": 74,
+      "k": 5,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 6,
+      "source": 65,
+      "target": 57,
+      "k": 2,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 7,
+      "source": 16,
+      "target": 65,
+      "k": 5,
+      "overlap_threshold": 49
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 8,
+      "queries": [
+        {
+          "source": 71,
+          "target": 59
+        },
+        {
+          "source": 39,
+          "target": 2
+        }
+      ],
+      "time_budget_ms": 20,
+      "acceptable_error_pct": 10.0
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 9,
+      "source": 27,
+      "target": 74,
+      "k": 2,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 10,
+      "source": 54,
+      "target": 44,
+      "k": 7,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 11,
+      "source": 69,
+      "target": 7,
+      "k": 2,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 12,
+      "source": 4,
+      "target": 36,
+      "k": 5,
+      "overlap_threshold": 31
+    }
+  ]
 }

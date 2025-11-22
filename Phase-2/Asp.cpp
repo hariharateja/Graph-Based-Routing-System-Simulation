@@ -157,7 +157,7 @@ json findAsp(const Graph& graph , const json& query){
         json item;
         item["source"] = s;
         item["target"] = t;
-        item["approx_shortest_distance"] = approx;
+        item["approx_shortest_distance"] = std::round(approx * 1000.0)/1000.0;
         out["distances"].push_back(item);
     }
 
