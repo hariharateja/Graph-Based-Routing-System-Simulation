@@ -6,4 +6,4 @@
 
 using json = nlohmann::json;
 
-json findKsp_heuristic(const Graph& graph, const json& query); //ESX-MinW applied yens algorithm to find K shortest paths
+json findKsp_heuristic(const Graph& graph, const json& query); //ESX-MinW applied Yens algorithm to find K shortest paths
