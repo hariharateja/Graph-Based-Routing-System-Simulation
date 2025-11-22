@@ -232,7 +232,7 @@ if __name__ == "__main__":
         (1000, 50, 500) # Stress Test
     ]
     
-    base_dir = "./tests"
+    base_dir = "./testcases"
     os.makedirs(base_dir, exist_ok=True)
     
     for i, (num_nodes, num_drivers, num_orders) in enumerate(TEST_SCENARIOS):
