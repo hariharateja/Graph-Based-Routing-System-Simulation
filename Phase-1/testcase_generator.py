@@ -229,7 +229,7 @@ if __name__ == "__main__":
         "knn", "modify_edge", "shortest_path", "shortest_path"
     ]
     
-    base_dir = "./tests"
+    base_dir = "./testcases"
     os.makedirs(base_dir, exist_ok=True)
     i=1
     for r_idx, (num_nodes, num_edges) in enumerate(TEST_SCENARIOS):
