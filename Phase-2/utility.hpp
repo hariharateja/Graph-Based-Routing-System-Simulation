@@ -10,4 +10,4 @@ struct Path {
 
 double heuristic(const Graph& graph, int node, int target);//heuristic function for A* - Euclidean distance
 
-std::string makePathSignature(const Path& p); //to identify unique paths [N:1,4,7|E:10,12]
+std::string makePathSignature(const Path& p); //to identify unique paths Ex: [N:1,4,7|E:10,12]
