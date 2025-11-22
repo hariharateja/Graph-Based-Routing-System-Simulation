@@ -5,7 +5,7 @@
     "results": [
         {
             "possible": false,
-            "processing_time": 0.003375
+            "processing_time": 0.003292
         },
         {
             "id": 2,
@@ -13,39 +13,39 @@
                 11,
                 19
             ],
-            "processing_time": 0.002708
+            "processing_time": 0.003
         },
         {
             "done": true,
             "id": 3,
-            "processing_time": 0.001084
+            "processing_time": 0.001167
         },
         {
             "possible": false,
-            "processing_time": 0.001875
+            "processing_time": 0.001917
         },
         {
             "done": false,
             "id": 5,
-            "processing_time": 0.002833
+            "processing_time": 0.000875
         },
         {
             "possible": false,
-            "processing_time": 0.001083
+            "processing_time": 0.001042
         },
         {
             "done": true,
             "id": 7,
-            "processing_time": 0.002125
+            "processing_time": 0.00125
         },
         {
             "done": true,
             "id": 8,
-            "processing_time": 0.000667
+            "processing_time": 0.000709
         },
         {
             "possible": false,
-            "processing_time": 0.000958
+            "processing_time": 0.001
         },
         {
             "id": 10,
@@ -55,7 +55,7 @@
                 9,
                 2
             ],
-            "processing_time": 0.003125
+            "processing_time": 0.00225
         }
     ]
 }

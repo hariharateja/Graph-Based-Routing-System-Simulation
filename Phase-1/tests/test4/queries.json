@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "id": "qset4"
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "shortest_path",
+      "source": 414,
+      "target": 310,
+      "mode": "time",
+      "constraints": {
+        "forbidden_road_types": [
+          "primary",
+          "secondary"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "knn",
+      "poi": "pharmacy",
+      "query_point": {
+        "lat": 19.092215,
+        "lon": 72.883441
+      },
+      "metric": "euclidean",
+      "k": 5
+    },
+    {
+      "id": 3,
+      "type": "remove_edge",
+      "edge_id": 14746
+    },
+    {
+      "id": 4,
+      "type": "shortest_path",
+      "source": 146,
+      "target": 103,
+      "mode": "time"
+    },
+    {
+      "id": 5,
+      "type": "modify_edge",
+      "edge_id": 19989,
+      "patch": {
+        "road_type": "local"
+      }
+    },
+    {
+      "id": 6,
+      "type": "shortest_path",
+      "source": 6,
+      "target": 316,
+      "mode": "distance"
+    },
+    {
+      "id": 7,
+      "type": "shortest_path",
+      "source": 183,
+      "target": 322,
+      "mode": "distance"
+    },
+    {
+      "id": 8,
+      "type": "remove_edge",
+      "edge_id": 12979
+    },
+    {
+      "id": 9,
+      "type": "knn",
+      "poi": "hotel",
+      "query_point": {
+        "lat": 19.093809,
+        "lon": 72.893788
+      },
+      "metric": "shortest_path",
+      "k": 22
+    },
+    {
+      "id": 10,
+      "type": "modify_edge",
+      "edge_id": 11359,
+      "patch": {
+        "average_time": 38.0967,
+        "road_type": "tertiary"
+      }
+    },
+    {
+      "id": 11,
+      "type": "shortest_path",
+      "source": 235,
+      "target": 390,
+      "mode": "time"
+    },
+    {
+      "id": 12,
+      "type": "shortest_path",
+      "source": 111,
+      "target": 430,
+      "mode": "time"
+    }
+  ]
+}

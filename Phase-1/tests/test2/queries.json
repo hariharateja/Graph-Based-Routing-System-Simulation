@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "id": "qset2"
+  },
+  "events": [
+    {
+      "id": 1,
+      "type": "shortest_path",
+      "source": 5,
+      "target": 25,
+      "mode": "time"
+    },
+    {
+      "id": 2,
+      "type": "knn",
+      "poi": "pharmacy",
+      "query_point": {
+        "lat": 19.052785,
+        "lon": 72.87042
+      },
+      "metric": "shortest_path",
+      "k": 2
+    },
+    {
+      "id": 3,
+      "type": "remove_edge",
+      "edge_id": 10104
+    },
+    {
+      "id": 4,
+      "type": "shortest_path",
+      "source": 10,
+      "target": 45,
+      "mode": "time",
+      "constraints": {
+        "forbidden_nodes": [
+          6,
+          45,
+          43,
+          33
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "type": "modify_edge",
+      "edge_id": 10058,
+      "patch": {
+        "average_time": 45.889
+      }
+    },
+    {
+      "id": 6,
+      "type": "shortest_path",
+      "source": 20,
+      "target": 14,
+      "mode": "distance"
+    },
+    {
+      "id": 7,
+      "type": "shortest_path",
+      "source": 17,
+      "target": 34,
+      "mode": "distance",
+      "constraints": {
+        "forbidden_nodes": [
+          38,
+          44,
+          49,
+          48
+        ],
+        "forbidden_road_types": [
+          "tertiary",
+          "expressway"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "remove_edge",
+      "edge_id": 10079
+    },
+    {
+      "id": 9,
+      "type": "knn",
+      "poi": "hotel",
+      "query_point": {
+        "lat": 19.070305,
+        "lon": 72.853109
+      },
+      "metric": "euclidean",
+      "k": 2
+    },
+    {
+      "id": 10,
+      "type": "modify_edge",
+      "edge_id": 10039
+    },
+    {
+      "id": 11,
+      "type": "shortest_path",
+      "source": 34,
+      "target": 15,
+      "mode": "distance"
+    },
+    {
+      "id": 12,
+      "type": "shortest_path",
+      "source": 2,
+      "target": 42,
+      "mode": "time",
+      "constraints": {
+        "forbidden_nodes": [
+          1,
+          0,
+          5
+        ]
+      }
+    }
+  ]
+}
