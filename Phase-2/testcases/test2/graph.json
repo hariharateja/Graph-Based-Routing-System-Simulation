@@ -1,0 +1,14 @@
+{
+  "nodes": [
+    { "id": 0, "lat": 12.0, "lon": 77.0 },
+    { "id": 1, "lat": 12.001, "lon": 77.000 },
+    { "id": 2, "lat": 12.002, "lon": 77.000 },
+    { "id": 3, "lat": 12.003, "lon": 77.001 }
+  ],
+
+  "edges": [
+    { "id": 10, "u": 0, "v": 1, "length": 100, "average_time": 100, "oneway": false, "road_type": "local" },
+    { "id": 11, "u": 1, "v": 2, "length": 100, "average_time": 100, "oneway": false, "road_type": "local" },
+    { "id": 12, "u": 2, "v": 3, "length": 120, "average_time": 100, "oneway": false, "road_type": "local" }
+  ]
+}

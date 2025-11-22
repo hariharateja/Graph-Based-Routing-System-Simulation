@@ -1,0 +1,32 @@
+{
+
+"meta" : {
+    "id" : "qset1"
+},
+"events" :[
+  {
+    "type": "k_shortest_paths",
+    "id": 1,
+    "source": 0,
+    "target": 3,
+    "k": 3,
+    "mode": "distance"
+  },
+  {
+    "type": "k_shortest_paths",
+    "id": 2,
+    "source": 1,
+    "target": 3,
+    "k": 4,
+    "mode": "distance"
+  },
+  {
+    "type": "k_shortest_paths",
+    "id": 3,
+    "source": 0,
+    "target": 3,
+    "k": 5,
+    "mode": "distance"
+  }
+]
+}

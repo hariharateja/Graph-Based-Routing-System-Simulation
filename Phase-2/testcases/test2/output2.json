@@ -1,0 +1,51 @@
+{
+    "meta": {
+        "id": "qset1"
+    },
+    "results": [
+        {
+            "id": 1,
+            "paths": [
+                {
+                    "length": 320.0,
+                    "path": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ]
+                }
+            ],
+            "processing_time": 0.053158
+        },
+        {
+            "id": 2,
+            "paths": [
+                {
+                    "length": 220.0,
+                    "path": [
+                        1,
+                        2,
+                        3
+                    ]
+                }
+            ],
+            "processing_time": 0.011822
+        },
+        {
+            "id": 3,
+            "paths": [
+                {
+                    "length": 320.0,
+                    "path": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ]
+                }
+            ],
+            "processing_time": 0.010002
+        }
+    ]
+}

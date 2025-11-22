@@ -47,7 +47,7 @@ Path A_star(const Graph& graph, int source, int target, const std::unordered_set
         pq.pop();
 
         if(u == target) break;
-        if(currdist - heuristic(graph, u, target) > dist[u]) continue;
+        if(currdist > dist[u] + heuristic(graph, u, target) ) continue;
 
         for( auto [v,edgeid,w] : graph.neighborsWithEdge(u)){
             if(bannedEdges.count(edgeid) || bannedNodes.count(v)) continue;
@@ -96,7 +96,6 @@ json findKsp_exact(const Graph& graph, const json& query) {
     int K = query.at("k");
     // output json
     json out;
-    out["type"] = type;
     out["id"] = id;
     out["paths"] = json::array();
     if (K <= 0) return out;
