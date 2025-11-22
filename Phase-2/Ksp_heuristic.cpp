@@ -93,17 +93,13 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
             std::vector<int> rootnodes(prevPath.nodes.begin(), prevPath.nodes.begin() + i + 1);
 
             std::unordered_set<int> bannedEdges;
-            std::unordered_set<int> bannedNodes;
+            std::unordered_set<int> bannedNodes(rootnodes.begin(), rootnodes.end() - 1); // create banned nodes
 
             for (const Path& p : Paths) {
                 if (p.nodes.size() > i + 1  && std::equal(rootnodes.begin(), rootnodes.end(), p.nodes.begin())) {
                     bannedEdges.insert(p.edgeIds[i]);
                 }
             } //create banned edges
- 
-            for (size_t j = 0; j < i  ; ++j) {
-                bannedNodes.insert(prevPath.nodes[j]);
-            } //create banned nodes
 
             //use A* to find spur path
             Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes);
@@ -118,8 +114,8 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
             candidatePath.edgeIds = rootedges;
             candidatePath.edgeIds.insert(candidatePath.edgeIds.end(), spurPath.edgeIds.begin(), spurPath.edgeIds.end());
 
-            
-            candidatePath.cost = prefixCost[i] + spurPath.cost;
+            double rootcost = prefixCost[i];
+            candidatePath.cost = rootcost + spurPath.cost;
 
             std::string signature = makePathSignature(candidatePath);
             if (seenPaths.insert(signature).second) {

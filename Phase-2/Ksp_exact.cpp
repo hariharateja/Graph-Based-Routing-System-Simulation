@@ -38,6 +38,9 @@ json findKsp_exact(const Graph& graph, const json& query) {
     for(int k = 1; k < K; ++k) { // loop over all K 
         const Path& prevPath = shortestPaths[k - 1];
 
+        int len = static_cast<int>(prevPath.nodes.size());
+        if( len < 2) break;
+
         // Compute prefix costs of the nodes in the previous path
         std::vector<double> prefixCost(prevPath.nodes.size(), 0.0);
         for (size_t j = 0; j < prevPath.edgeIds.size(); ++j) {
