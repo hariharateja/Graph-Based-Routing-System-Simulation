@@ -227,7 +227,7 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
             std::unordered_set<int> bannedNodes;
 
             for (const Path& p : Paths) {
-                if (p.nodes.size() > i && std::equal(rootnodes.begin(), rootnodes.end(), p.nodes.begin())) {
+                if (p.nodes.size() > i + 1  && std::equal(rootnodes.begin(), rootnodes.end(), p.nodes.begin())) {
                     bannedEdges.insert(p.edgeIds[i]);
                 }
             } //create banned edges
@@ -336,10 +336,10 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
     });
 
     for(const Path& p : finalPaths) {
-        json pathJson;
-        pathJson["path"] = p.nodes;
-        pathJson["length"] = p.cost;
-        out["paths"].push_back(pathJson);
+        json item;
+        item["path"] = p.nodes;
+        item["length"] = p.cost;
+        out["paths"].push_back(item);
     }
 
     return out;
