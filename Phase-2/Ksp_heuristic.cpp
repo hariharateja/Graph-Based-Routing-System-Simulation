@@ -65,7 +65,9 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
     std::vector<Path> Paths;
     if (maxPaths <= 0) return Paths;
 
-    Path first = A_star_with_bans(graph, source, target, {}, {});
+    std::vector<double> h = heuristic_values(graph, target);
+
+    Path first = A_star_with_bans(graph, source, target, {}, {}, h);
     if (first.nodes.empty()) {
         return Paths;
     }
@@ -102,7 +104,7 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
             } //create banned edges
 
             //use A* to find spur path
-            Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes);
+            Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes, h);
             
             if (spurPath.nodes.empty()) continue;
 
@@ -146,7 +148,7 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
     out["paths"] = json::array();
     if (K <= 0) return out;
 
-    int maxCandidatePaths = 5 * K;
+    int maxCandidatePaths = 3 * K;
 
     std::vector<Path> candidatePaths = YensCandidates(graph, source, target, maxCandidatePaths);
 
@@ -163,56 +165,32 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
 
 
-    // for(int i=1; i < pathsToSelect; i++){
-    //     double bestPenalty = std::numeric_limits<double>::max();    
-    //     int bestIndex = -1;
+    for(int i=1; i < pathsToSelect; i++){
+        double bestPenalty = std::numeric_limits<double>::max();    
+        int bestIndex = -1;
 
-    //     for(int j=1; j < availablePaths; j++){
-    //         if (std::find(selectedIndices.begin(), selectedIndices.end(), j) != selectedIndices.end()) {
-    //             continue; // already selected
-    //         }
-
-    //         std::vector<int> tempIndices = selectedIndices;
-    //         tempIndices.push_back(j);
-
-    //         double penalty = computeTotalPenaltyForSet(candidatePaths, tempIndices, baseCost, static_cast<double>(overlap_threshold));
-
-    //         if (penalty < bestPenalty || (penalty == bestPenalty && (bestIndex == -1 || candidatePaths[j].cost < candidatePaths[bestIndex].cost))){
-    //             bestPenalty = penalty;
-    //             bestIndex = j;
-    //         }
-    //     }
-
-    //     if (bestIndex == -1) {
-    //         break; // no more paths can be selected
-    //     } else {
-    //         selectedIndices.push_back(bestIndex);
-    //     }
-    // }
-
-    double bestPenalty = std::numeric_limits<double>::max();
-    
-    std::vector<int> temp = {0};
-    temp.reserve(pathsToSelect);
-
-    std::function<void(int,int)> best_comb = [&](int start, int left){
-        if (left == 0) {
-            double penalty = computeTotalPenaltyForSet(candidatePaths, temp, baseCost, overlap_threshold);
-            if (penalty < bestPenalty) {
-                bestPenalty = penalty;
-                selectedIndices = temp;
+        for(int j=1; j < availablePaths; j++){
+            if (std::find(selectedIndices.begin(), selectedIndices.end(), j) != selectedIndices.end()) {
+                continue; // already selected
             }
-            return;
+
+            std::vector<int> tempIndices = selectedIndices;
+            tempIndices.push_back(j);
+
+            double penalty = computeTotalPenaltyForSet(candidatePaths, tempIndices, baseCost, static_cast<double>(overlap_threshold));
+
+            if (penalty < bestPenalty || (penalty == bestPenalty && (bestIndex == -1 || candidatePaths[j].cost < candidatePaths[bestIndex].cost))){
+                bestPenalty = penalty;
+                bestIndex = j;
+            }
         }
 
-        for(int i = start; i <= availablePaths - left; i++){
-            temp.push_back(i);
-            best_comb(i + 1, left - 1);
-            temp.pop_back();
+        if (bestIndex == -1) {
+            break; // no more paths can be selected
+        } else {
+            selectedIndices.push_back(bestIndex);
         }
-    };
-
-    best_comb(1, pathsToSelect - 1);
+    }
 
 
     // Prepare output
