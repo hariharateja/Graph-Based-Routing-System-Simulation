@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "id": "phase2_test_5"
+  },
+  "events": [
+    {
+      "type": "k_shortest_paths",
+      "id": 1,
+      "source": 297,
+      "target": 53,
+      "k": 4,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 2,
+      "source": 25,
+      "target": 264,
+      "k": 5,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 3,
+      "source": 236,
+      "target": 71,
+      "k": 4,
+      "overlap_threshold": 49
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 4,
+      "queries": [
+        {
+          "source": 191,
+          "target": 128
+        },
+        {
+          "source": 67,
+          "target": 78
+        },
+        {
+          "source": 47,
+          "target": 256
+        }
+      ],
+      "time_budget_ms": 10,
+      "acceptable_error_pct": 15.0
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 5,
+      "source": 164,
+      "target": 276,
+      "k": 2,
+      "overlap_threshold": 57
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 6,
+      "source": 3,
+      "target": 154,
+      "k": 6,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 7,
+      "source": 252,
+      "target": 21,
+      "k": 5,
+      "overlap_threshold": 51
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 8,
+      "queries": [
+        {
+          "source": 294,
+          "target": 101
+        },
+        {
+          "source": 106,
+          "target": 120
+        },
+        {
+          "source": 87,
+          "target": 285
+        },
+        {
+          "source": 220,
+          "target": 181
+        },
+        {
+          "source": 48,
+          "target": 183
+        }
+      ],
+      "time_budget_ms": 5,
+      "acceptable_error_pct": 5.0
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 9,
+      "source": 239,
+      "target": 277,
+      "k": 7,
+      "overlap_threshold": 38
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 10,
+      "source": 140,
+      "target": 29,
+      "k": 6,
+      "overlap_threshold": 41
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 11,
+      "queries": [
+        {
+          "source": 269,
+          "target": 271
+        },
+        {
+          "source": 98,
+          "target": 277
+        },
+        {
+          "source": 87,
+          "target": 164
+        },
+        {
+          "source": 223,
+          "target": 244
+        }
+      ],
+      "time_budget_ms": 10,
+      "acceptable_error_pct": 10.0
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 12,
+      "source": 9,
+      "target": 260,
+      "k": 4,
+      "mode": "distance"
+    }
+  ]
+}
