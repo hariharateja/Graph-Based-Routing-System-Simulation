@@ -35,4 +35,4 @@ struct OrderStatus {
     double completion_time = 0.0;
 };
 
-json solve_delivery_scheduling(const Graph& graph, const json& query);    
+json solve_delivery_scheduling(const Graph& graph, const json& query ,bool min_max);    

@@ -97,7 +97,7 @@ json findKsp_exact(const Graph& graph, const json& query) {
     for (const auto& p : shortestPaths) {
         out["paths"].push_back({
             {"path", p.nodes},
-            {"length", p.cost}
+            {"length", std::round(p.cost * 1000.0)/1000.0 }
         });
     }
 

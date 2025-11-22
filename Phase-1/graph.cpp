@@ -84,29 +84,37 @@ bool Graph::modifyEdge(const json& event) {
         Edge& e = m_edges[edgeId];
         auto& vec = m_adjList[e.u];
 
-        bool disabled = false;
-        if (std::find(vec.begin(),vec.end(),e.id) == vec.end()) { // if the edge was disabled
-            vec.push_back(e.id);
-            if(!e.oneway) m_adjList[e.v].push_back(e.id);
-            disabled = true;
-        }
+        bool is_disabled = std::find(vec.begin(), vec.end(), e.id) == vec.end();
         
-        // if no patch nor enabling an edge
-        if(!disabled && (!event.contains("patch") || event.at("patch").empty())){
-            return false;
-        }
-        
-        // if there is patch
-        const json patch = event.at("patch");
+        bool has_valid_patch = event.contains("patch") && !event.at("patch").empty();
 
-        if (patch.contains("length")) e.length = patch.at("length");
-        if (patch.contains("average_time")) e.average_time = patch.at("average_time");
-        if (patch.contains("speed_profile")) e.speed_profile = patch.at("speed_profile").get<std::vector<double>>();
+        if (!is_disabled && !has_valid_patch) {
+            return false; 
+        }
+        if (is_disabled) {
+            vec.push_back(e.id);
+            if (!e.oneway) {
+                m_adjList[e.v].push_back(e.id);
+            }
+            if (!has_valid_patch) {
+                return true; 
+            }
+        }
+        if (has_valid_patch) {
+            const json& patch = event.at("patch");
+
+            if (patch.contains("length")) e.length = patch.at("length");
+            if (patch.contains("average_time")) e.average_time = patch.at("average_time");
+            if (patch.contains("speed_profile")) {
+                e.speed_profile = patch.at("speed_profile").get<std::vector<double>>();
+            }
+            if (patch.contains("road_type")) e.road_type = patch.at("road_type");
+        }
         
         return true;
     }
     else {
-        return false;
+        return false; // Edge ID not found
     }
 }
 

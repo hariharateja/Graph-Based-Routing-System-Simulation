@@ -206,7 +206,7 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
     for(const Path& p : finalPaths) {
         json item;
         item["path"] = p.nodes;
-        item["length"] = p.cost;
+        item["length"] = std::round(p.cost * 1000.0)/1000.0;
         out["paths"].push_back(item);
     }
 

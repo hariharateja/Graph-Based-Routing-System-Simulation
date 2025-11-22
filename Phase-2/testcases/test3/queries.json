@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "id": "phase2_test_3"
+  },
+  "events": [
+    {
+      "type": "approx_shortest_path",
+      "id": 1,
+      "queries": [
+        {
+          "source": 95,
+          "target": 29
+        },
+        {
+          "source": 57,
+          "target": 89
+        }
+      ],
+      "time_budget_ms": 10,
+      "acceptable_error_pct": 5.0
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 2,
+      "source": 65,
+      "target": 51,
+      "k": 4,
+      "mode": "distance"
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 3,
+      "queries": [
+        {
+          "source": 20,
+          "target": 49
+        },
+        {
+          "source": 81,
+          "target": 0
+        }
+      ],
+      "time_budget_ms": 5,
+      "acceptable_error_pct": 5.0
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 4,
+      "source": 76,
+      "target": 55,
+      "k": 2,
+      "overlap_threshold": 24
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 5,
+      "source": 28,
+      "target": 47,
+      "k": 2,
+      "overlap_threshold": 58
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 6,
+      "source": 92,
+      "target": 49,
+      "k": 5,
+      "mode": "distance"
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 7,
+      "queries": [
+        {
+          "source": 91,
+          "target": 76
+        },
+        {
+          "source": 7,
+          "target": 99
+        },
+        {
+          "source": 22,
+          "target": 81
+        },
+        {
+          "source": 63,
+          "target": 56
+        }
+      ],
+      "time_budget_ms": 5,
+      "acceptable_error_pct": 5.0
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 8,
+      "queries": [
+        {
+          "source": 24,
+          "target": 4
+        },
+        {
+          "source": 76,
+          "target": 65
+        },
+        {
+          "source": 66,
+          "target": 89
+        },
+        {
+          "source": 29,
+          "target": 78
+        }
+      ],
+      "time_budget_ms": 10,
+      "acceptable_error_pct": 15.0
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 9,
+      "source": 46,
+      "target": 30,
+      "k": 7,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths",
+      "id": 10,
+      "source": 20,
+      "target": 11,
+      "k": 4,
+      "mode": "distance"
+    },
+    {
+      "type": "k_shortest_paths_heuristic",
+      "id": 11,
+      "source": 45,
+      "target": 85,
+      "k": 5,
+      "overlap_threshold": 45
+    },
+    {
+      "type": "approx_shortest_path",
+      "id": 12,
+      "queries": [
+        {
+          "source": 66,
+          "target": 1
+        },
+        {
+          "source": 94,
+          "target": 90
+        },
+        {
+          "source": 8,
+          "target": 11
+        }
+      ],
+      "time_budget_ms": 15,
+      "acceptable_error_pct": 15.0
+    }
+  ]
+}

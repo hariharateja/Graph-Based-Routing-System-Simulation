@@ -63,17 +63,38 @@ json findAsp(const Graph& graph , const json& query){
         asp_num_landmarks = 32;
     }
 
-    //preprocess
+    //build landmarks
     if(!asp_built){
         auto nodes = graph.getAllNodeIds();
         int n = nodes.size();
         int l = std::min(n,asp_num_landmarks);
 
-        std::shuffle(nodes.begin(), nodes.end(),std::mt19937{std::random_device{}()});
-        asp_landmarks.assign(nodes.begin(),nodes.begin()+l);
-        
+        asp_landmarks.clear();
         asp_distFromLandmarks.assign(l,std::vector<double>(n,INF));
-        for(int i=0; i<l; i++){
+
+        int first_landmark = nodes[std::rand()%n];
+        asp_landmarks.push_back(first_landmark);
+        asp_dijsktra(graph,first_landmark,asp_distFromLandmarks[0]);
+
+        for(int i=1; i<l; i++){
+            double bestscore = -1.0;
+            int bestNode = -1;
+            for (int v = 0; v < n; v++) {
+                double min_d = INF;
+
+                // find minimum distance to ANY already selected landmark
+                for (int j = 0; j < i; j++) {
+                    min_d = std::min(min_d, asp_distFromLandmarks[j][v]);
+                }
+
+                if (min_d < INF && min_d > bestscore) {
+                    bestscore = min_d;
+                    bestNode = v;
+                }
+            }
+
+            if(bestNode == -1) break;
+            asp_landmarks.push_back(bestNode);
             asp_dijsktra(graph,asp_landmarks[i],asp_distFromLandmarks[i]);
         }
 
@@ -88,7 +109,7 @@ json findAsp(const Graph& graph , const json& query){
     auto start = std::chrono::high_resolution_clock::now();
 
     int l = asp_landmarks.size();
-    double alpha; //factor btw lowerbound and upperbound
+    double alpha = 0.5; //factor btw lowerbound and upperbound
     if(acceptable_error_pct == 15.0){
         alpha = 0.3;
     }else if(acceptable_error_pct == 10.0){
@@ -136,7 +157,7 @@ json findAsp(const Graph& graph , const json& query){
         json item;
         item["source"] = s;
         item["target"] = t;
-        item["approx_shortest_distance"] = approx;
+        item["approx_shortest_distance"] = std::round(approx * 1000.0)/1000.0;
         out["distances"].push_back(item);
     }
 
