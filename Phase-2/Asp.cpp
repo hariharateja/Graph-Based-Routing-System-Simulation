@@ -21,8 +21,8 @@ static std::vector<int> asp_landmarks; // landmark node ids
 static std::vector<std::vector<double>> asp_distFromLandmarks; // dist from landmarks
 
 void asp_dijsktra(const Graph& graph, int source, std::vector<double>& dist) {
-    dist.clear();
-    dist.resize(graph.getAllNodeIds().size(), INF);
+    int n = graph.getAllNodeIds().size();
+    dist.assign(n,INF);
     dist[source] = 0.0;
 
     using PDI = std::pair<double, int>;
@@ -55,18 +55,13 @@ json findAsp(const Graph& graph , const json& query){
     const auto& qlist = query.at("queries");
 
     //no. of landmarks based on the error;
-    if(acceptable_error_pct == 15){
+    if(acceptable_error_pct == 15.0){
         asp_num_landmarks = 8;
-    }else if(acceptable_error_pct == 10){
+    }else if(acceptable_error_pct == 10.0){
         asp_num_landmarks = 16;
-    }else if(acceptable_error_pct == 5){
+    }else if(acceptable_error_pct == 5.0){
         asp_num_landmarks = 32;
     }
-
-    if (!asp_built) {
-        asp_landmarks.clear();
-        asp_distFromLandmarks.clear();
-    }      
 
     //preprocess
     if(!asp_built){
@@ -93,6 +88,14 @@ json findAsp(const Graph& graph , const json& query){
     auto start = std::chrono::high_resolution_clock::now();
 
     int l = asp_landmarks.size();
+    double alpha; //factor btw lowerbound and upperbound
+    if(acceptable_error_pct == 15.0){
+        alpha = 0.3;
+    }else if(acceptable_error_pct == 10.0){
+       alpha = 0.4;
+    }else if(acceptable_error_pct == 5.0){
+        alpha = 0.5;
+    }
     //loop over every landmark
     for(auto &q : qlist){
         auto now = std::chrono::high_resolution_clock::now();
@@ -105,25 +108,35 @@ json findAsp(const Graph& graph , const json& query){
             break;
         }
 
-        double best = 0.0;
+        double LB = 0.0;
+        double UB = INF;
         for(int i=0; i<l; i++){
             double ds = asp_distFromLandmarks[i][s];
             double dt = asp_distFromLandmarks[i][t];
 
             if(dt < INF && ds < INF){
                 double diff = std::fabs(ds-dt);
-                if(diff > best) best = diff;
+                if(diff > LB) LB = diff;
+                double sum = ds+dt;
+                if(sum < UB ) UB = sum;
             }
         }
 
-        if(best == 0.0){
-            best = -1.0;
-        }
+        double approx;
+
+        if(UB < INF){
+            approx = alpha*LB + (1-alpha)*UB;
+        }else if(LB >0.0){
+            approx = LB;
+        }else{
+            approx = -1.0;
+        }   
+
 
         json item;
         item["source"] = s;
         item["target"] = t;
-        item["approx_shortest_distance"] = best;
+        item["approx_shortest_distance"] = approx;
         out["distances"].push_back(item);
     }
 
