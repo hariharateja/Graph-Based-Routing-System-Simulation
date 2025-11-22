@@ -7,7 +7,8 @@
 #include <limits>
 #include <algorithm>
 #include <chrono>
-
+    
+using PDI = std::pair<double, int>;
 
 static constexpr double INF = std::numeric_limits<double>::infinity();
 //
@@ -25,7 +26,6 @@ void asp_dijsktra(const Graph& graph, int source, std::vector<double>& dist) {
     dist.assign(n,INF);
     dist[source] = 0.0;
 
-    using PDI = std::pair<double, int>;
     std::priority_queue<PDI, std::vector<PDI>, std::greater<PDI>> pq;
     pq.push({0.0, source});
 
