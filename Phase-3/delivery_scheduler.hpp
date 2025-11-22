@@ -26,6 +26,7 @@ struct DriverState {
     std::vector<int> delivered_orders_history; // delivered order ids history 
 };
 
+const bool RESEARCH_MODE = true;
 struct OrderStatus {
     int id;
     int pickup;
@@ -33,6 +34,10 @@ struct OrderStatus {
     bool is_picked_up = false;
     bool is_delivered = false;
     double completion_time = 0.0;
+
+    // NEW FIELD
+    double ready_time = 0.0;
+    double priority = 1.0;
 };
 
 json solve_delivery_scheduling(const Graph& graph, const json& query ,bool min_max);    
