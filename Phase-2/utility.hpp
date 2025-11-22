@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "graph.hpp"
+#include <cmath>
 struct Path {
     std::vector<int> nodes;  
     std::vector<int> edgeIds;
