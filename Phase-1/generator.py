@@ -29,6 +29,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 
     return R_earth * c
 
+
 def generate_speed_profile(road_type: str) -> List[float]:
     """Creates a realistic 96-slot speed profile based on road type characteristics."""
     # Base speeds and deviation ranges (in m/s)

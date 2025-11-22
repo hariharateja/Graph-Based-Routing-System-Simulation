@@ -194,5 +194,5 @@ def generate_phase2_tests(output_dir: str):
 
 
 if __name__ == "__main__":
-    generate_phase2_tests("Phase-2/testcases")
+    generate_phase2_tests("./testcases")
     print("All 6 testcases generated in folder: testcases/")

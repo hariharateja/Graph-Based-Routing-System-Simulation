@@ -7,8 +7,7 @@
 #include <limits>
 #include <algorithm>
 #include <chrono>
-    
-using PDI = std::pair<double, int>;
+
 
 static constexpr double INF = std::numeric_limits<double>::infinity();
 //
@@ -26,6 +25,7 @@ void asp_dijsktra(const Graph& graph, int source, std::vector<double>& dist) {
     dist.assign(n,INF);
     dist[source] = 0.0;
 
+    using PDI = std::pair<double, int>;
     std::priority_queue<PDI, std::vector<PDI>, std::greater<PDI>> pq;
     pq.push({0.0, source});
 
@@ -71,31 +71,39 @@ json findAsp(const Graph& graph , const json& query){
 
         asp_landmarks.clear();
         asp_distFromLandmarks.assign(l,std::vector<double>(n,INF));
-
-        int first_landmark = nodes[std::rand()%n];
+    
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, n - 1);
+        int first_landmark = nodes[dis(gen)];
         asp_landmarks.push_back(first_landmark);
         asp_dijsktra(graph,first_landmark,asp_distFromLandmarks[0]);
 
+        // Track min distance from any landmark for each node
+        std::vector<double> minDist(n, INF);
+        for(int v=0; v<n; ++v){
+            minDist[v] = asp_distFromLandmarks[0][v];
+        }
         for(int i=1; i<l; i++){
-            double bestscore = -1.0;
+            double bestdist = -1.0;
             int bestNode = -1;
             for (int v = 0; v < n; v++) {
-                double min_d = INF;
-
-                // find minimum distance to ANY already selected landmark
-                for (int j = 0; j < i; j++) {
-                    min_d = std::min(min_d, asp_distFromLandmarks[j][v]);
-                }
-
-                if (min_d < INF && min_d > bestscore) {
-                    bestscore = min_d;
+                if(minDist[v] > bestdist){
+                    bestdist = minDist[v];
                     bestNode = v;
                 }
             }
 
-            if(bestNode == -1) break;
+            if(bestNode == -1 || bestdist <= 0) break;
+
             asp_landmarks.push_back(bestNode);
             asp_dijsktra(graph,asp_landmarks[i],asp_distFromLandmarks[i]);
+
+            for(int v=0; v<n; v++){
+                if(asp_distFromLandmarks[i][v] < minDist[v]){
+                    minDist[v] = asp_distFromLandmarks[i][v];
+                }
+            }
         }
 
         asp_built = true;
@@ -109,50 +117,44 @@ json findAsp(const Graph& graph , const json& query){
     auto start = std::chrono::high_resolution_clock::now();
 
     int l = asp_landmarks.size();
-    double alpha = 0.5; //factor btw lowerbound and upperbound
-    if(acceptable_error_pct == 15.0){
-        alpha = 0.3;
-    }else if(acceptable_error_pct == 10.0){
-       alpha = 0.4;
-    }else if(acceptable_error_pct == 5.0){
-        alpha = 0.5;
-    }
+    
     //loop over every landmark
     for(auto &q : qlist){
         auto now = std::chrono::high_resolution_clock::now();
         double elapsed = std::chrono::duration<double,std::milli>(now-start).count();
 
-        int s = q.at("source");
-        int t = q.at("target");
-
         if(elapsed > time_budget_ms){
             break;
         }
 
-        double LB = 0.0;
-        double UB = INF;
+        int s = q.at("source");
+        int t = q.at("target");
+
+        if(s == t ){
+            out["distances"].push_back({
+                {"source",s},
+                {"target",t},
+                {"approx_shortest_distance",0.0}
+            });
+            continue;
+        }
+
+        double LB = 0.0;    
         for(int i=0; i<l; i++){
             double ds = asp_distFromLandmarks[i][s];
             double dt = asp_distFromLandmarks[i][t];
 
             if(dt < INF && ds < INF){
                 double diff = std::fabs(ds-dt);
-                if(diff > LB) LB = diff;
-                double sum = ds+dt;
-                if(sum < UB ) UB = sum;
+                LB = std::max(LB,diff);
             }
         }
 
-        double approx;
+        double approx = LB;
 
-        if(UB < INF){
-            approx = alpha*LB + (1-alpha)*UB;
-        }else if(LB >0.0){
-            approx = LB;
-        }else{
+        if(approx == 0.0){
             approx = -1.0;
-        }   
-
+        }
 
         json item;
         item["source"] = s;

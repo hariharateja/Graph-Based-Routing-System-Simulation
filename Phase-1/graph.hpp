@@ -44,7 +44,7 @@ class Graph {
         since we are returning the reference there is chance of chaning internal data. To make sure they are safe we used const 
         (Suggested by autofill github)
         */ 
-        const int no_of_nodes() const;
+  int no_of_nodes() const;
         const std::vector<int>& getNeighborEdges(int nodeId) const;
         const Edge& getEdge(int edgeId) const;  
         const Node& getNode(int nodeId) const;
