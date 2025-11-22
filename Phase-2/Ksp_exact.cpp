@@ -23,17 +23,22 @@ json findKsp_exact(const Graph& graph, const json& query) {
     out["paths"] = json::array();
     if (K <= 0) return out;
 
-    Path first = A_star_with_bans(graph, source, target, {} , {});
+    std::vector<double> h = heuristic_values(graph, target);
+
+    Path first = A_star_with_bans(graph, source, target, {} , {}, h);
 
     if (first.nodes.empty()) {
         return out;
     }
 
     std::vector<Path> shortestPaths;//shortest paths
+    shortestPaths.reserve(K);
     shortestPaths.push_back(first);
 
     std::priority_queue<Path, std::vector<Path>, ComparePath> candidatePaths;
     std::set<std::string> seenPaths;
+    std::string firstSignature = makePathSignature(first);
+    seenPaths.insert(firstSignature);    
 
     for(int k = 1; k < K; ++k) { // loop over all K 
         const Path& prevPath = shortestPaths[k - 1];
@@ -62,7 +67,7 @@ json findKsp_exact(const Graph& graph, const json& query) {
             } //create banned edges
 
             //use A* to find spur path
-            Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes);
+            Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes, h);
             
             if (spurPath.nodes.empty()) continue;
 

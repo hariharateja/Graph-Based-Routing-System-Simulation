@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+
 //to identify unique paths Ex: [N:1,4,7|E:10,12]
 std::string makePathSignature(const Path& p) {
     std::ostringstream oss;
@@ -53,7 +54,19 @@ double heuristic(const Graph& graph, int node, int target){
     return R * c; // in meters
 }
 
-Path A_star_with_bans(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes)
+std::vector<double> heuristic_values(const Graph& graph, int target){
+    std::vector<double> h(graph.no_of_nodes(), 0);
+    for(int i=0; i < graph.no_of_nodes(); i++){
+        h[i] = heuristic(graph, i, target);
+    }
+    return h;
+}
+
+
+Path A_star_with_bans(const Graph& graph, int source, int target,
+    const std::unordered_set<int>& bannedEdges,
+    const std::unordered_set<int>& bannedNodes,
+    const std::vector<double>& h)
 {
     Path resultpath;
     // trivial case
@@ -73,7 +86,7 @@ Path A_star_with_bans(const Graph& graph, int source, int target, const std::uno
     if (bannedNodes.count(source)) return resultpath; // no path
 
     dist[source] = 0.0;
-    pq.push({heuristic(graph, source, target), source});
+    pq.push({h[source], source});
 
     while (!pq.empty()) {
         auto [currdist, u] = pq.top();
@@ -81,7 +94,7 @@ Path A_star_with_bans(const Graph& graph, int source, int target, const std::uno
 
         if (u == target) break;
 
-        if (currdist - heuristic(graph, u, target) > dist[u]) continue;
+        if (currdist > h[u] + dist[u] + 1e-9) continue;
 
         for (auto [v, edgeid, w] : graph.neighborsWithEdge(u)) {
             if (bannedEdges.count(edgeid) || bannedNodes.count(v)) continue;
@@ -91,7 +104,7 @@ Path A_star_with_bans(const Graph& graph, int source, int target, const std::uno
                 dist[v] = newDist;
                 parentNode[v]= u;
                 parentEdge[v]= edgeid;
-                pq.push({newDist + heuristic(graph, v, target), v});
+                pq.push({newDist + h[v], v});
             }
         }
     }

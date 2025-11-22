@@ -2,6 +2,16 @@
 #include <vector>
 #include "graph.hpp"
 #include <cmath>
+#include <vector>
+#include <queue>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <limits>
+#include <algorithm>
+#include <sstream>
+#include <string>
+
 struct Path {
     std::vector<int> nodes;  
     std::vector<int> edgeIds;
@@ -24,5 +34,7 @@ std::string makePathSignature(const Path& p); //to identify unique paths Ex: [N:
 
 double heuristic(const Graph& graph, int node, int target);//heuristic function for A* - Euclidean distance
 
-Path A_star_with_bans(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes);
+std::vector<double> heuristic_values(const Graph& graph, int target);
+
+Path A_star_with_bans(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes,  const std::vector<double>& h);
 // A* with banned edges and nodes
