@@ -26,9 +26,6 @@ struct ShortestPathResult {
             }
             result["path"] = path;
         }
-        else{
-            return {{"possible", false}};
-        }
         return result;
     }
 };
