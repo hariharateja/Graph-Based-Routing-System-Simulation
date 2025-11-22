@@ -118,8 +118,9 @@ bool Graph::modifyEdge(const json& event) {
     }
 }
 
-int no_of_nodes() {
-    return m_nodes.size();
+// Return number of nodes in the graph. Implemented as a member of Graph.
+int Graph::no_of_nodes() const {
+    return static_cast<int>(m_nodes.size());
 }
 
 const std::vector<int>& Graph::getNeighborEdges(int nodeId) const {
