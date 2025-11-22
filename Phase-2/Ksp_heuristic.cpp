@@ -93,17 +93,13 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
             std::vector<int> rootnodes(prevPath.nodes.begin(), prevPath.nodes.begin() + i + 1);
 
             std::unordered_set<int> bannedEdges;
-            std::unordered_set<int> bannedNodes;
+            std::unordered_set<int> bannedNodes(rootnodes.begin(), rootnodes.end() - 1); // create banned nodes
 
             for (const Path& p : Paths) {
                 if (p.nodes.size() > i + 1  && std::equal(rootnodes.begin(), rootnodes.end(), p.nodes.begin())) {
                     bannedEdges.insert(p.edgeIds[i]);
                 }
             } //create banned edges
- 
-            for (size_t j = 0; j < i  ; ++j) {
-                bannedNodes.insert(prevPath.nodes[j]);
-            } //create banned nodes
 
             //use A* to find spur path
             Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes);
@@ -118,8 +114,8 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
             candidatePath.edgeIds = rootedges;
             candidatePath.edgeIds.insert(candidatePath.edgeIds.end(), spurPath.edgeIds.begin(), spurPath.edgeIds.end());
 
-            
-            candidatePath.cost = prefixCost[i] + spurPath.cost;
+            double rootcost = prefixCost[i];
+            candidatePath.cost = rootcost + spurPath.cost;
 
             std::string signature = makePathSignature(candidatePath);
             if (seenPaths.insert(signature).second) {
@@ -167,9 +163,6 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
 
 
-
-
-
     // for(int i=1; i < pathsToSelect; i++){
     //     double bestPenalty = std::numeric_limits<double>::max();    
     //     int bestIndex = -1;
@@ -197,20 +190,29 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
     //     }
     // }
 
-
-    std::vector<double> distancePenalty(availablePaths, 0.1);
-    if (baseCost > 1e-9) { // safety
-        for(int i = 0; i < availablePaths; i++) {
-            double percentDiff = (pi.cost - baseCost) / baseCost * 100.0;
-            if (percentDiff < 0.0) percentDiff = 0.0; // safety
-            double frac = percentDiff / 100.0;
-            distPenalty[i] += frac;
-        }
-    }
-
-    // overlap[i] = % of edges common between path i and shortest
-    std::vector<std::vector<double>> overlap(N, std::vector<double>(N, 0.0));
+    double bestPenalty = std::numeric_limits<double>::max();
     
+    std::vector<int> temp = {0};
+    temp.reserve(pathsToSelect);
+
+    std::function<void(int,int)> best_comb = [&](int start, int left){
+        if (left == 0) {
+            double penalty = computeTotalPenaltyForSet(candidatePaths, temp, baseCost, overlap_threshold);
+            if (penalty < bestPenalty) {
+                bestPenalty = penalty;
+                selectedIndices = temp;
+            }
+            return;
+        }
+
+        for(int i = start; i <= availablePaths - left; i++){
+            temp.push_back(i);
+            best_comb(i + 1, left - 1);
+            temp.pop_back();
+        }
+    };
+
+    best_comb(1, pathsToSelect - 1);
 
 
     // Prepare output
