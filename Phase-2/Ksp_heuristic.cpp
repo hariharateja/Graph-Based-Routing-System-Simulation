@@ -8,137 +8,6 @@
 #include <algorithm>
 #include <sstream>
 
-struct CompareCost {
-    bool operator()(const std::pair<double,int>& a, const std::pair<double,int>& b) const {
-        return a.first > b.first;
-    }
-}; // compare cost for pq 
-struct ComparePath {
-    bool operator()(const Path& a, const Path& b) const {
-        return a.cost > b.cost;
-    }
-}; // compare path based on cost
-
-// A* algorithm regular
-Path A_star_regular(const Graph& graph, int source, int target) {
-    Path resultpath;
-    if (source == target) {
-        resultpath.nodes = {source};
-        resultpath.cost = 0.0;
-        return resultpath;
-    }
-
-    std::unordered_map<int, double> dist;
-    std::unordered_map<int, int> parentNode;
-    std::unordered_map<int, int> parentEdge;
-
-    std::priority_queue<std::pair<double,int>, std::vector<std::pair<double,int>>, CompareCost> pq;
-
-    dist[source] = 0.0;
-    pq.push({heuristic(graph, source, target), source});
-
-    while (!pq.empty()) {
-        auto [currdist, u] = pq.top();
-        pq.pop();
-
-        if (u == target) break;
-        if (currdist - heuristic(graph, u, target) > dist[u]) continue;
-
-        for (auto [v, edgeid, w] : graph.neighborsWithEdge(u)) {
-            if (!dist.count(v) || dist[u] + w < dist[v]) {
-                dist[v] = dist[u] + w;
-                parentNode[v] = u;
-                parentEdge[v] = edgeid;
-                pq.push({dist[v] + heuristic(graph, v, target), v});
-            }
-        }
-    }
-
-    if (!dist.count(target)) return resultpath;
-
-    // Backtrack
-    int curr = target;
-    while (curr != source) {
-        resultpath.nodes.push_back(curr);
-        resultpath.edgeIds.push_back(parentEdge[curr]);
-        curr = parentNode[curr];
-    }
-    resultpath.nodes.push_back(source);
-    //reverse to get correct order
-    std::reverse(resultpath.nodes.begin(), resultpath.nodes.end());
-    std::reverse(resultpath.edgeIds.begin(), resultpath.edgeIds.end());
-    resultpath.cost = dist[target];
-    return resultpath;
-}
-
-//A-star with banned edges and nodes
-static Path A_star_with_bans(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes)
-{
-    Path resultpath;
-    // trivial case
-    if (source == target) {
-        resultpath.nodes = {source};
-        resultpath.edgeIds = {};
-        resultpath.cost = 0.0;
-        return resultpath;
-    }
-
-    std::unordered_map<int, double> dist;
-    std::unordered_map<int, int>  parentNode;
-    std::unordered_map<int, int>  parentEdge;
-
-    std::priority_queue<std::pair<double,int>, std::vector<std::pair<double,int>>, CompareCost> pq;
-
-    if (bannedNodes.count(source)) return resultpath; // no path
-
-    dist[source] = 0.0;
-    pq.push({heuristic(graph, source, target), source});
-
-    while (!pq.empty()) {
-        auto [currdist, u] = pq.top();
-        pq.pop();
-
-        if (u == target) break;
-
-        if (currdist - heuristic(graph, u, target) > dist[u]) continue;
-
-        for (auto [v, edgeid, w] : graph.neighborsWithEdge(u)) {
-            if (bannedEdges.count(edgeid) || bannedNodes.count(v)) continue;
-
-            double newDist = dist[u] + w;
-            if (!dist.count(v) || newDist < dist[v]) {
-                dist[v] = newDist;
-                parentNode[v]= u;
-                parentEdge[v]= edgeid;
-                pq.push({newDist + heuristic(graph, v, target), v});
-            }
-        }
-    }
-
-    if (dist.find(target) == dist.end()) return resultpath; // no path
-
-    // backtrack
-    std::vector<int> nodeslist;
-    std::vector<int> edgelist;
-
-    int curr = target;
-    while (curr != source) {
-        nodeslist.push_back(curr);
-        edgelist.push_back(parentEdge[curr]);
-        curr = parentNode[curr];
-    }
-    nodeslist.push_back(source);
-
-    std::reverse(nodeslist.begin(), nodeslist.end());
-    std::reverse(edgelist.begin(), edgelist.end());
-
-    resultpath.nodes   = std::move(nodeslist);
-    resultpath.edgeIds = std::move(edgelist);
-    resultpath.cost    = dist[target];
-    return resultpath;
-}
-
-//ESX-MinW helpers
 
 static double computeOverlapPercent(const Path& a, const Path& b) {
     if (a.edgeIds.empty() || b.edgeIds.empty()) return 0.0;
@@ -168,11 +37,11 @@ static double computeTotalPenaltyForSet(const std::vector<Path>& allPaths, const
         // Distance Penalty for i = percentage difference from shortest / 100 + 0.1
         // percentage difference = (len_i - len_shortest) / len_shortest * 100
         double distPenalty = 0.1;
-        if (baseCost > 1e-9) {
+        if (baseCost > 1e-9) { // safety
             double percentDiff = (pi.cost - baseCost) / baseCost * 100.0;
             if (percentDiff < 0.0) percentDiff = 0.0; // safety
             double frac = percentDiff / 100.0;
-            distPenalty = frac + 0.1;
+            distPenalty += frac;
         }
 
         // Overlap penalty:
@@ -196,7 +65,7 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
     std::vector<Path> Paths;
     if (maxPaths <= 0) return Paths;
 
-    Path first = A_star_regular(graph, source, target);
+    Path first = A_star_with_bans(graph, source, target, {}, {});
     if (first.nodes.empty()) {
         return Paths;
     }
@@ -269,21 +138,19 @@ static std::vector<Path> YensCandidates(const Graph& graph, int source , int tar
 
 json findKsp_heuristic(const Graph& graph, const json& query) {
     // ESX-MinW applied Yens algorithm to find K shortest paths
-    std::string type = query.at("type");
     int id = query.at("id");
     int source = query.at("source");
     int target = query.at("target");
     int K = query.at("k");
-    int overlap_threshold = query.value("overlap_threshold", 0); // default overlap is 0
+    int overlap_threshold = query.value("overlap_threshold", 60); // default overlap is taken 60
 
     // output json
-    json out; 
+    json out;
     out["id"] = id;
     out["paths"] = json::array();
     if (K <= 0) return out;
 
-    int maxCandidatePaths = 3 * K;
-    maxCandidatePaths = std::min(maxCandidatePaths, 50); // at most 50 candidates
+    int maxCandidatePaths = 5 * K;
 
     std::vector<Path> candidatePaths = YensCandidates(graph, source, target, maxCandidatePaths);
 
@@ -298,32 +165,53 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
     std::vector<int> selectedIndices = {0}; // always select the shortest path
 
-    for(int i=1; i < pathsToSelect; i++){
-        double bestPenalty = std::numeric_limits<double>::max();    
-        int bestIndex = -1;
 
-        for(int j=1; j < availablePaths; j++){
-            if (std::find(selectedIndices.begin(), selectedIndices.end(), j) != selectedIndices.end()) {
-                continue; // already selected
-            }
 
-            std::vector<int> tempIndices = selectedIndices;
-            tempIndices.push_back(j);
 
-            double penalty = computeTotalPenaltyForSet(candidatePaths, tempIndices, baseCost, static_cast<double>(overlap_threshold));
 
-            if (penalty < bestPenalty || (penalty == bestPenalty && (bestIndex == -1 || candidatePaths[j].cost < candidatePaths[bestIndex].cost))){
-                bestPenalty = penalty;
-                bestIndex = j;
-            }
-        }
 
-        if (bestIndex == -1) {
-            break; // no more paths can be selected
-        } else {
-            selectedIndices.push_back(bestIndex);
+    // for(int i=1; i < pathsToSelect; i++){
+    //     double bestPenalty = std::numeric_limits<double>::max();    
+    //     int bestIndex = -1;
+
+    //     for(int j=1; j < availablePaths; j++){
+    //         if (std::find(selectedIndices.begin(), selectedIndices.end(), j) != selectedIndices.end()) {
+    //             continue; // already selected
+    //         }
+
+    //         std::vector<int> tempIndices = selectedIndices;
+    //         tempIndices.push_back(j);
+
+    //         double penalty = computeTotalPenaltyForSet(candidatePaths, tempIndices, baseCost, static_cast<double>(overlap_threshold));
+
+    //         if (penalty < bestPenalty || (penalty == bestPenalty && (bestIndex == -1 || candidatePaths[j].cost < candidatePaths[bestIndex].cost))){
+    //             bestPenalty = penalty;
+    //             bestIndex = j;
+    //         }
+    //     }
+
+    //     if (bestIndex == -1) {
+    //         break; // no more paths can be selected
+    //     } else {
+    //         selectedIndices.push_back(bestIndex);
+    //     }
+    // }
+
+
+    std::vector<double> distancePenalty(availablePaths, 0.1);
+    if (baseCost > 1e-9) { // safety
+        for(int i = 0; i < availablePaths; i++) {
+            double percentDiff = (pi.cost - baseCost) / baseCost * 100.0;
+            if (percentDiff < 0.0) percentDiff = 0.0; // safety
+            double frac = percentDiff / 100.0;
+            distPenalty[i] += frac;
         }
     }
+
+    // overlap[i] = % of edges common between path i and shortest
+    std::vector<std::vector<double>> overlap(N, std::vector<double>(N, 0.0));
+    
+
 
     // Prepare output
     std::vector<Path> finalPaths;

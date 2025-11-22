@@ -45,3 +45,68 @@ double heuristic(const Graph& graph, int node, int target){
     return R * c; // in meters
 }
 
+Path A_star_with_bans(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes)
+{
+    Path resultpath;
+    // trivial case
+    if (source == target) {
+        resultpath.nodes = {source};
+        resultpath.edgeIds = {};
+        resultpath.cost = 0.0;
+        return resultpath;
+    }
+
+    std::unordered_map<int, double> dist;
+    std::unordered_map<int, int>  parentNode;
+    std::unordered_map<int, int>  parentEdge;
+
+    std::priority_queue<std::pair<double,int>, std::vector<std::pair<double,int>>, CompareCost> pq;
+
+    if (bannedNodes.count(source)) return resultpath; // no path
+
+    dist[source] = 0.0;
+    pq.push({heuristic(graph, source, target), source});
+
+    while (!pq.empty()) {
+        auto [currdist, u] = pq.top();
+        pq.pop();
+
+        if (u == target) break;
+
+        if (currdist - heuristic(graph, u, target) > dist[u]) continue;
+
+        for (auto [v, edgeid, w] : graph.neighborsWithEdge(u)) {
+            if (bannedEdges.count(edgeid) || bannedNodes.count(v)) continue;
+
+            double newDist = dist[u] + w;
+            if (!dist.count(v) || newDist < dist[v]) {
+                dist[v] = newDist;
+                parentNode[v]= u;
+                parentEdge[v]= edgeid;
+                pq.push({newDist + heuristic(graph, v, target), v});
+            }
+        }
+    }
+
+    if (dist.find(target) == dist.end()) return resultpath; // no path
+
+    // backtrack
+    std::vector<int> nodeslist;
+    std::vector<int> edgelist;
+
+    int curr = target;
+    while (curr != source) {
+        nodeslist.push_back(curr);
+        edgelist.push_back(parentEdge[curr]);
+        curr = parentNode[curr];
+    }
+    nodeslist.push_back(source);
+
+    std::reverse(nodeslist.begin(), nodeslist.end());
+    std::reverse(edgelist.begin(), edgelist.end());
+
+    resultpath.nodes   = std::move(nodeslist);
+    resultpath.edgeIds = std::move(edgelist);
+    resultpath.cost    = dist[target];
+    return resultpath;
+}

@@ -10,82 +10,6 @@
 #include <string>
 
 
-struct ComparePath {
-    bool operator()(const Path& a, const Path& b) const {
-        return a.cost > b.cost;
-    }
-}; // compare path based on cost
-struct CompareCost {
-    bool operator()(const std::pair<double,int>& a, const std::pair<double,int>& b) const {
-        return a.first > b.first;
-    }
-}; // compare cost for pq 
-
-// using A* algo with banned edges and nodes
-Path A_star(const Graph& graph, int source, int target, const std::unordered_set<int>& bannedEdges, const std::unordered_set<int>& bannedNodes){
-    Path resultpath;
-    //trivial case
-    if(source == target){
-        resultpath.nodes = {source};
-        resultpath.edgeIds = {};
-        resultpath.cost = 0.0;
-        return resultpath;
-    }
-
-    std::unordered_map<int, double> dist;
-    std::unordered_map<int, int> parentNode;
-    std::unordered_map<int, int> parentEdge;
-
-    std::priority_queue<std::pair<double,int>, std::vector<std::pair<double,int>>, CompareCost> pq;
-
-    if( bannedNodes.count(source)) return resultpath;// no path
-    dist[source] = 0.0;
-    pq.push({heuristic(graph, source, target), source});
-
-    while(!pq.empty()){
-        auto [currdist, u] = pq.top();
-        pq.pop();
-
-        if(u == target) break;
-        if(currdist > dist[u] + heuristic(graph, u, target) ) continue;
-
-        for( auto [v,edgeid,w] : graph.neighborsWithEdge(u)){
-            if(bannedEdges.count(edgeid) || bannedNodes.count(v)) continue;
-
-            if(!dist.count(v) || dist[u] + w < dist[v]){
-                dist[v] = dist[u] + w;
-                parentNode[v] = u;
-                parentEdge[v] = edgeid;
-                pq.push({dist[v] + heuristic(graph, v, target), v});
-            }
-        }
-    }
-
-    if(dist.find(target) == dist.end()) return resultpath;
-
-    std::vector<int> nodeslist;
-    std::vector<int> edgelist;
-    // backtrack
-    int curr = target; 
-    while(curr != source){
-        nodeslist.push_back(curr);
-        edgelist.push_back( parentEdge[curr]);
-        curr = parentNode[curr];
-    }
-    nodeslist.push_back(source);
-
-    //reverse to get correct order
-    std::reverse(nodeslist.begin(), nodeslist.end());
-    std::reverse(edgelist.begin(), edgelist.end());
-    //store in resultpath
-    resultpath.nodes = nodeslist;
-    resultpath.edgeIds = edgelist;
-    resultpath.cost = dist[target];
-    return resultpath;
-}
-
-
-
 // Yens algorithm
 json findKsp_exact(const Graph& graph, const json& query) {
     // parse query
@@ -99,7 +23,7 @@ json findKsp_exact(const Graph& graph, const json& query) {
     out["paths"] = json::array();
     if (K <= 0) return out;
 
-    Path first = A_star(graph, source, target, {} , {});
+    Path first = A_star_with_bans(graph, source, target, {} , {});
 
     if (first.nodes.empty()) {
         return out;
@@ -111,11 +35,11 @@ json findKsp_exact(const Graph& graph, const json& query) {
     std::priority_queue<Path, std::vector<Path>, ComparePath> candidatePaths;
     std::set<std::string> seenPaths;
 
-    for(int k = 1; k < K; ++k) {//loop over all K 
+    for(int k = 1; k < K; ++k) { // loop over all K 
         const Path& prevPath = shortestPaths[k - 1];
 
-        // Compute prefix costs for the previous path
-        std::vector<double> prefixCost(prevPath.edgeIds.size() + 1, 0.0);
+        // Compute prefix costs of the nodes in the previous path
+        std::vector<double> prefixCost(prevPath.nodes.size(), 0.0);
         for (size_t j = 0; j < prevPath.edgeIds.size(); ++j) {
             prefixCost[j + 1] = prefixCost[j] + graph.edgeWeight(prevPath.edgeIds[j]);
         }
@@ -126,20 +50,16 @@ json findKsp_exact(const Graph& graph, const json& query) {
             std::vector<int> rootnodes(prevPath.nodes.begin(), prevPath.nodes.begin() + i + 1);
 
             std::unordered_set<int> bannedEdges;
-            std::unordered_set<int> bannedNodes;
+            std::unordered_set<int> bannedNodes(rootnodes.begin(), rootnodes.end() - 1); // create banned nodes
 
             for (const Path& p : shortestPaths) {
-                if (p.nodes.size() > i + 1 && std::equal(rootnodes.begin(), rootnodes.end(), p.nodes.begin())) {
+                if (p.nodes.size() > i + 1 && std::equal(rootnodes.begin(), rootnodes.end(), p.nodes.begin())) { // Prefix match
                     bannedEdges.insert(p.edgeIds[i]);
                 }
             } //create banned edges
- 
-            for (size_t j = 0; j < i  ; ++j) {
-                bannedNodes.insert(prevPath.nodes[j]);
-            } //create banned nodes
 
             //use A* to find spur path
-            Path spurPath = A_star(graph, spurNode, target, bannedEdges, bannedNodes);
+            Path spurPath = A_star_with_bans(graph, spurNode, target, bannedEdges, bannedNodes);
             
             if (spurPath.nodes.empty()) continue;
 
@@ -155,11 +75,12 @@ json findKsp_exact(const Graph& graph, const json& query) {
             candidatePath.cost = rootcost + spurPath.cost;
 
             std::string signature = makePathSignature(candidatePath);
-            if (seenPaths.insert(signature).second) {
+            if (seenPaths.insert(signature).second) { // checks whether the insert is success/not
                 candidatePaths.push(candidatePath);
             }
 
         }
+
         if (candidatePaths.empty()) break;
         shortestPaths.push_back(candidatePaths.top());
         candidatePaths.pop();
