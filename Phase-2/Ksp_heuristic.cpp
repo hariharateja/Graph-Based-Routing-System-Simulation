@@ -167,9 +167,6 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
 
 
 
-
-
-
     // for(int i=1; i < pathsToSelect; i++){
     //     double bestPenalty = std::numeric_limits<double>::max();    
     //     int bestIndex = -1;
@@ -197,20 +194,29 @@ json findKsp_heuristic(const Graph& graph, const json& query) {
     //     }
     // }
 
-
-    std::vector<double> distancePenalty(availablePaths, 0.1);
-    if (baseCost > 1e-9) { // safety
-        for(int i = 0; i < availablePaths; i++) {
-            double percentDiff = (pi.cost - baseCost) / baseCost * 100.0;
-            if (percentDiff < 0.0) percentDiff = 0.0; // safety
-            double frac = percentDiff / 100.0;
-            distPenalty[i] += frac;
-        }
-    }
-
-    // overlap[i] = % of edges common between path i and shortest
-    std::vector<std::vector<double>> overlap(N, std::vector<double>(N, 0.0));
+    double bestPenalty = std::numeric_limits<double>::max();
     
+    std::vector<int> temp = {0};
+    temp.reserve(pathsToSelect);
+
+    std::function<void(int,int)> best_comb = [&](int start, int left){
+        if (left == 0) {
+            double penalty = computeTotalPenaltyForSet(candidatePaths, temp, baseCost, overlap_threshold);
+            if (penalty < bestPenalty) {
+                bestPenalty = penalty;
+                selectedIndices = temp;
+            }
+            return;
+        }
+
+        for(int i = start; i <= availablePaths - left; i++){
+            temp.push_back(i);
+            best_comb(i + 1, left - 1);
+            temp.pop_back();
+        }
+    };
+
+    best_comb(1, pathsToSelect - 1);
 
 
     // Prepare output
