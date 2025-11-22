@@ -110,6 +110,10 @@ bool Graph::modifyEdge(const json& event) {
     }
 }
 
+int no_of_nodes() {
+    return m_nodes.size();
+}
+
 const std::vector<int>& Graph::getNeighborEdges(int nodeId) const {
     static const std::vector<int> dummy = {};
     if (nodeId < 0 || nodeId >= static_cast<int>(m_nodes.size())) return dummy;
