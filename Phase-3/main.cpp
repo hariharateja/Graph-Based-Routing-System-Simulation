@@ -9,15 +9,20 @@ using json = nlohmann::json;
 
 Graph graph; // global graph object
 int main(int argc, char* argv[]){
-    if (argc != 4){
-        std::cerr << "Usage: " << argv[0] << " <graph.json> <queries.json> <output.json>" << std::endl;
+    if (argc != 5){
+        std::cerr << "Usage: " << argv[0] << " <graph.json> <queries.json> <output.json> <srategy:min_max or total_min>" << std::endl;
         return 1;
     }
 
     std::string graphJsonPath = argv[1];
     std::string queriesJsonPath = argv[2];
     std::string outputJsonPath = argv[3];
+    std::string strategy = argv[4];
 
+    bool RUN_MIN_MAX_STRATEGY = false;
+    if (strategy == "min_max"){
+        bool RUN_MIN_MAX_STRATEGY = true;
+    }
     std::ifstream graphFile(graphJsonPath);
 
     if (!graphFile.is_open()){
@@ -40,7 +45,7 @@ int main(int argc, char* argv[]){
 
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    json output = solve_delivery_scheduling(graph, input_json);
+    json output = solve_delivery_scheduling(graph, input_json ,RUN_MIN_MAX_STRATEGY);
     
     auto end_time = std::chrono::high_resolution_clock::now();
 
