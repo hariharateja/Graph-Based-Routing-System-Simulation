@@ -19,7 +19,7 @@ json process_query(const json& event){
     
     else if (eventType == "modify_edge") {   
         bool done = graph.modifyEdge(event);
-        return json{{"id", event.at("id")}, {"done", done}};
+        return json{{"id", event.value("id", -1)}, {"done", done}};
     }
     
     return json{{"error", "unknown_event_type"}};
