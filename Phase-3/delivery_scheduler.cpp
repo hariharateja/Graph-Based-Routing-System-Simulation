@@ -8,6 +8,8 @@
 #include <chrono> // Added for processing time
 
 // Helper to compute all-pairs shortest paths between interest points
+const int MAX_CAPACITY = RESEARCH_MODE ? 3 : 1000;
+
 std::map<int, std::map<int, double>> compute_distance_matrix(const Graph& graph, const std::vector<int>& interest_points){
     std::map<int, std::map<int, double>> matrix;
     for(int src : interest_points){
@@ -87,8 +89,10 @@ std::tuple<int, int, bool> find_min_max_move(
             double travel_cost = std::numeric_limits<double>::max();
             bool is_pickup = false;
 
+            bool has_space = driver.carried_orders.size() < MAX_CAPACITY;
+
             // Check Validity: Pickup
-            if (!order.is_picked_up && dist_matrix.at(current_node).count(order.pickup)) {
+            if (!order.is_picked_up && has_space && dist_matrix.at(current_node).count(order.pickup)) {
                 travel_cost = dist_matrix.at(current_node).at(order.pickup);
                 is_pickup = true;
             }
@@ -106,9 +110,17 @@ std::tuple<int, int, bool> find_min_max_move(
 
             // Evaluate Impact on Max Time
             if (travel_cost != std::numeric_limits<double>::max()){
-                double potential_finish_time = driver.current_time + travel_cost;
+                double arrival_time = driver.current_time + travel_cost;
+                double actual_finish_time = arrival_time;
 
-                double new_max_time = std::max(potential_finish_time, current_max_driver_time);
+                if (is_pickup) {
+                    actual_finish_time = std::max(arrival_time, order.ready_time);
+                }
+                else{
+                    actual_finish_time = arrival_time;
+                }
+
+                double new_max_time = std::max(actual_finish_time, current_max_driver_time);
 
                 if (new_max_time < min_overall_max_time){
                     min_overall_max_time = new_max_time;
@@ -124,6 +136,7 @@ std::tuple<int, int, bool> find_min_max_move(
 
 json solve_delivery_scheduling(const Graph& graph, const json& query, bool min_max){
     // Start Timer
+    std::srand(42);
     auto start_time = std::chrono::high_resolution_clock::now();
 
     int depot = query["fleet"]["depot_node"];
@@ -138,12 +151,18 @@ json solve_delivery_scheduling(const Graph& graph, const json& query, bool min_m
         ord.id = o["order_id"];
         ord.pickup = o["pickup"];
         ord.dropoff = o["dropoff"];
+
         orders.push_back(ord);
-        
+        if (RESEARCH_MODE){
+            ord.ready_time = (std::rand() % 15);
+
+            bool is_vip = (std::rand() % 100) < 20; 
+            orders.back().priority = is_vip ? 3.0 : 1.0;
+        }
         interest_points.push_back(ord.pickup);
         interest_points.push_back(ord.dropoff);
     }
-    
+
     std::sort(interest_points.begin(), interest_points.end());
     interest_points.erase(std::unique(interest_points.begin(), interest_points.end()), interest_points.end());
 
@@ -194,10 +213,17 @@ json solve_delivery_scheduling(const Graph& graph, const json& query, bool min_m
                 int current_node = driver.current_node;
                 
                 for (size_t i = 0; i < orders.size(); ++i){
-                    if (!orders[i].is_picked_up){
-                        double t = dist_matrix[current_node][orders[i].pickup];
-                        if (t < move_travel_cost){
-                            move_travel_cost = t;
+                    if (!orders[i].is_picked_up && driver.carried_orders.size() < MAX_CAPACITY){
+                        double travel = dist_matrix[current_node][orders[i].pickup];
+
+                        double arrival = driver.current_time + travel;
+                        double ready = orders[i].ready_time;
+                        double wait_time = std::max(0.0, ready - arrival);
+
+                        double effective_cost = travel + wait_time;
+                        double weighted_score = effective_cost / orders[i].priority;
+                        if (effective_cost < move_travel_cost){
+                            move_travel_cost = weighted_score;
                             best_order_idx = i;
                             is_pickup_move = true;
                         }
@@ -209,8 +235,9 @@ json solve_delivery_scheduling(const Graph& graph, const json& query, bool min_m
                         
                         if (carrying){
                             double t = dist_matrix[current_node][orders[i].dropoff];
-                            if (t < move_travel_cost){
-                                move_travel_cost = t;
+                            double weighted_cost_ = t/orders[i].priority;
+                            if (weighted_cost_ < move_travel_cost){
+                                move_travel_cost = weighted_cost_;
                                 best_order_idx = i;
                                 is_pickup_move = false;
                             }
@@ -243,7 +270,15 @@ json solve_delivery_scheduling(const Graph& graph, const json& query, bool min_m
                 driver.route_path.push_back(target_node);
             }
 
-            driver.current_time += move_travel_cost;
+            double travel_time = dist_matrix.at(driver.current_node).at(target_node);
+            double arrival_time = driver.current_time + travel_time;
+
+            if (is_pickup_move) {
+                double ready = order.ready_time;
+                driver.current_time = std::max(arrival_time, ready);
+            } else {
+                driver.current_time = arrival_time;
+            }
             driver.current_node = target_node;
 
             if (is_pickup_move){
@@ -301,5 +336,26 @@ json solve_delivery_scheduling(const Graph& graph, const json& query, bool min_m
     output["metrics"]["processing_time_ms"] = duration.count();
     output["metrics"]["strategy_used"] = min_max ? "Minimize Max Time" : "Minimize Total Time";
 
+    if (RESEARCH_MODE) {
+        double total_vip_time = 0;
+        int vip_count = 0;
+        double total_std_time = 0;
+        int std_count = 0;
+
+        for(const auto& o : orders) {
+            if(o.priority > 1.5) { 
+                total_vip_time += o.completion_time;
+                vip_count++;
+            } else {
+                total_std_time += o.completion_time;
+                std_count++;
+            }
+        }
+
+        output["metrics"]["avg_vip_time"] = vip_count ? (total_vip_time / vip_count) : 0.0;
+        output["metrics"]["avg_std_time"] = std_count ? (total_std_time / std_count) : 0.0;
+    
+        output["metrics"]["count_vip"] = vip_count;
+    }    
     return output;
 }
